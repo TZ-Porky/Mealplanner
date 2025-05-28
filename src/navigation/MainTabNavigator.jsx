@@ -1,104 +1,132 @@
+/* eslint-disable react-native/no-inline-styles */
 // --------------------------------------------------------------------//
-import React, { View, Text } from 'react';
+import React from 'react';
+import {View, Text, TouchableOpacity} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 // --------------------------------------------------------------------//
 
-// --------------------------------------------------------------------//
 import HomeScreen from '../screens/Homescreen/HomeScreen';
-//import StocksScreen from '../screens/StocksScreen';
-//import ProfileScreenContent from '../screens/ProfileScreen';
-//import ShoppingListScreen from '../screens/ShoppingListScreen';
-//import MealPlannerScreen from '../screens/MealPlannerScreen';
-import Colors from '../constants/colors';
+// Placeholder components (à remplacer plus tard par les vrais)
+import {Colors} from '../styles/AppStyles';
+import styles from './MainTabNavigator';
 // --------------------------------------------------------------------//
 
-// Crée une instance de création de barre de navigation
 const Tab = createBottomTabNavigator();
 
-// -------------------------------------------------------------------//
-/*                             Fonction Test                          */
-// -------------------------------------------------------------------//
-
-function StockPage() {
-  return(
+// --------------------------------------------------------------------//
+// Temporary screen components (replace with real screens later)
+// --------------------------------------------------------------------//
+function StocksScreen() {
+  return (
     <View>
-      <Text>Page des stocks</Text>
+      <Text>Stocks Page</Text>
     </View>
   );
 }
 
-function MarketPage() {
-  return(
+function MarketScreen() {
+  return (
     <View>
-      <Text>Page du marché</Text>
+      <Text>Market Page</Text>
     </View>
   );
 }
 
-function PlanningPage() {
-  return(
+function PlanningScreen() {
+  return (
     <View>
-      <Text>Page du Planning</Text>
+      <Text>Planning Page</Text>
     </View>
   );
 }
 
-function ProfilePage() {
-  return(
+function ProfileScreen() {
+  return (
     <View>
-      <Text>Page de Profile</Text>
+      <Text>Profile Page</Text>
     </View>
   );
 }
 
-// -------------------------------------------------------------------//
-/*           Options de navigation de la barre de navigation          */
-// -------------------------------------------------------------------//
-const screenOptions = ({route}) => ({
-  tabBarIcon: ({focused, color, size}) => {
-    let iconName;
+// --------------------------------------------------------------------//
+// Tab bar icon and style configuration
+// --------------------------------------------------------------------//
+function CustomTabBar({state, descriptors, navigation}) {
+  return (
+    <View style={styles.tabBar}>
+      {state.routes.map((route, index) => {
+        if (route.name === 'Add') {
+          return (
+            <TouchableOpacity
+              key={index}
+              onPress={() => navigation.navigate(route.name)}
+              style={styles.fabButton}>
+              <Ionicons name="add" size={35} color="#fff" />
+            </TouchableOpacity>
+          );
+        }
 
-    if (route.name === 'Accueil') {
-      iconName = focused ? 'home' : 'home-outline';
-    } else if (route.name === 'Planning') {
-      iconName = focused ? 'calendar' : 'calendar-outline';
-    } else if (route.name === 'Recettes') {
-      iconName = focused ? 'restaurant' : 'restaurant-outline';
-    } else if (route.name === 'Stocks') {
-      iconName = focused ? 'cube' : 'cube-outline';
-    } else if (route.name === 'Courses') {
-      iconName = focused ? 'cart' : 'cart-outline';
-    } else if (route.name === 'Profil') {
-      iconName = focused ? 'person' : 'person-outline';
-    }
+        const {options} = descriptors[route.key];
+        const label = options.tabBarLabel ?? options.title ?? route.name;
+        const isFocused = state.index === index;
 
-    return <Ionicons name={iconName} size={size} color={color} />;
-  },
-  tabBarActiveTintColor: Colors.primary,
-  tabBarInactiveTintColor: 'gray',
-  tabBarStyle: {
-    backgroundColor: '#f0f0f0',
-    height: 60,
-    paddingBottom: 5,
-  },
-  tabBarLabelStyle: {
-    fontSize: 12,
-  },
-  headerShown: false,
-});
+        let iconName;
+        switch (route.name) {
+          case 'Home':
+            iconName = isFocused ? 'home' : 'home-outline';
+            break;
+          case 'Planning':
+            iconName = isFocused ? 'calendar' : 'calendar-outline';
+            break;
+          case 'Market':
+            iconName = isFocused ? 'cart' : 'cart-outline';
+            break;
+          case 'Profile':
+            iconName = isFocused ? 'person' : 'person-outline';
+            break;
+          case 'Stocks':
+            iconName = isFocused ? 'cube' : 'cube-outline';
+            break;
+        }
 
-// -------------------------------------------------------------------//
-/*                         Barre de navigation                        */
-// -------------------------------------------------------------------//
+        return (
+          <TouchableOpacity
+            key={index}
+            onPress={() => navigation.navigate(route.name)}
+            style={styles.tabItem}>
+            <Ionicons
+              name={iconName}
+              size={24}
+              color={isFocused ? Colors.textLight : Colors.buttonPressed}
+            />
+            <Text
+              style={{
+                fontSize: 10,
+                color: isFocused ? Colors.textLight : Colors.buttonPressed,
+              }}>
+              {label}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
+}
+
+// --------------------------------------------------------------------//
+// Main Tab Navigator
+// --------------------------------------------------------------------//
 function MainTabNavigator() {
   return (
-    <Tab.Navigator screenOptions={screenOptions}>
-      <Tab.Screen name="Planning" component={PlanningPage} />
-      <Tab.Screen name="Stocks" component={StockPage} />
-      <Tab.Screen name="Accueil" component={HomeScreen} />
-      <Tab.Screen name="Courses" component={MarketPage} />
-      <Tab.Screen name="Profil" component={ProfilePage} />
+    <Tab.Navigator
+      screenOptions={{headerShown: false}}
+      tabBar={props => <CustomTabBar {...props} />}>
+      <Tab.Screen name="Planning" component={PlanningScreen} />
+      <Tab.Screen name="Stocks" component={StocksScreen} />
+      <Tab.Screen name="Add" component={HomeScreen} />
+      <Tab.Screen name="Market" component={MarketScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 }

@@ -3,9 +3,12 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-//import MainTabNavigator from './src/navigation/MainTabNavigator'; // Assurez-vous que le chemin est correct
+import MainTabNavigator from './src/navigation/MainTabNavigator'; // Assurez-vous que le chemin est correct
 import SplashScreen from './src/screens/Splashscreen/SplashScreen';
-import AuthentificationScreen from './src/screens/Authentificationscreen/AuthentificationScreen';
+import LandingScreen from './src/screens/Landingscreen/LandingScreen';
+import ConnexionScreen from './src/screens/Authentificationscreen/ConnexionScreen';
+import InscriptionScreen from './src/screens/Authentificationscreen/InscriptionScreen';
+import SetupNavigator from './src/navigation/SetupNavigator';
 
 const Stack = createNativeStackNavigator();
 
@@ -13,7 +16,11 @@ function RootStack() {
   return (
     <Stack.Navigator initialRouteName="/" screenOptions={{headerShown: false}}>
       <Stack.Screen name="/" component={SplashScreen} />
-      <Stack.Screen name="Auth" component={AuthentificationScreen} />
+      <Stack.Screen name="Land" component={LandingScreen} />
+      <Stack.Screen name="SignIn" component={ConnexionScreen} />
+      <Stack.Screen name="SignUp" component={InscriptionScreen} />
+      <Stack.Screen name="Setup" component={SetupNavigator} />
+      <Stack.Screen name="Main" component={MainTabNavigator} />
     </Stack.Navigator>
   );
 }

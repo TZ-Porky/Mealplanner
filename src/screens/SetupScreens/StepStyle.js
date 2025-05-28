@@ -1,25 +1,77 @@
 import {StyleSheet} from 'react-native';
 import {Colors} from '../../styles/AppStyles';
-//const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    //justifyContent: 'center',
-    alignItems: 'center',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
     backgroundColor: Colors.blankBackground,
   },
   header: {
-    flex: 1,
+    flex: 1.1,
+    flexDirection: 'column',
     width: '100%',
     padding: 10,
+    backgroundColor: Colors.primaryOrange,
   },
-  preHeader: {
+  stepBarContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    margin: 2,
+    gap: 10,
+  },
+  stepBar: {
+    width: 80,
+    height: 5,
+    backgroundColor: Colors.cardBackground,
+    borderRadius: 10,
+  },
+  title: {
+    position: 'relative',
+    top: 55,
+    textAlign: 'left',
+    fontWeight: '900',
+    fontSize: 28,
+    color: Colors.textLight,
+    marginBottom: 5,
+  },
+  subtitle: {
+    position: 'relative',
+    top: 55,
+    fontSize: 16,
+    textAlign: 'left',
+    fontWeight: '600',
+    justifyContent: 'center',
+    alignItems: 'center',
+    textAlignVertical: 'bottom',
+    color: Colors.textLight,
+    marginBottom: 60,
+  },
+  body: {
+    flex: 9,
+    paddingVertical: 20,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  main: {
     textAlign: 'center',
     fontWeight: '900',
     fontSize: 28,
     color: Colors.primaryOrange,
-    marginBottom: 2,
+    marginBottom: 10,
+  },
+  mainText: {
+    padding: 10,
+    textAlign: 'center',
+    fontWeight: '600',
+    fontSize: 15,
+    color: Colors.textDark,
+    marginTop: 10,
   },
   field: {
     marginBottom: 0,
@@ -33,14 +85,23 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: 10,
     paddingHorizontal: 12,
-    paddingVertical: 10,
-    gap: 8,
+    paddingVertical: 5,
+    gap: 5,
+  },
+  buttonContainer: {
+    margin: 5,
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    gap: 5,
   },
   icon: {
     marginRight: 10,
   },
-  p:
-  {
+  p: {
     textAlign: 'center',
   },
   input: {
@@ -55,8 +116,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     alignItems: 'center',
   },
-  pPassword:
-  {
+  pPassword: {
     position: 'relative',
     textAlign: 'left',
     padding: 5,
@@ -81,15 +141,7 @@ const styles = StyleSheet.create({
     gap: 25,
     alignItems: 'center',
   },
-  subtitle:
-  {
-    paddingVertical: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    textAlignVertical: 'bottom',
-  },
-  power:
-  {
+  power: {
     color: Colors.primaryOrange,
     fontWeight: '700',
   },

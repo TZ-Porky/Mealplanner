@@ -1,52 +1,57 @@
 import { StyleSheet } from 'react-native';
-import Colors from '../constants/colors';
+import { Colors } from '../../styles/AppStyles';
 
 const styles = StyleSheet.create({
-    Container:
+    container:
     {
-        backgroundColor: Colors.primary,
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
+        flex: 1,
         justifyContent: 'center',
+        gap: 10,
+        backgroundColor: Colors.blankBackground,
+    },
+    coverImage:
+    {
+        flex: 1.2,
+        width: 'auto',
+        objectFit: 'cover',
+    },
+    downContainer:
+    {
+        flex: 2,
+        padding: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     h1:
     {
-        color: Colors.textPrimary,
-        fontSize: 25,
-        textAlign: 'center',
-        fontWeight: 'bold',
-        padding: 5,
+        fontSize: 30,
+        fontWeight: '900',
     },
     p:
     {
-        color: Colors.textPrimary,
-        fontSize: 13,
+        paddingVertical: 20,
+        paddingHorizontal: 30,
+        fontSize: 14,
         textAlign: 'center',
+    },
+    link:
+    {
         padding: 10,
+        color: Colors.primaryOrange,
+        fontSize: 16,
+        fontWeight: '700',
     },
-    HoverContainer:
+    pAuth:
     {
-        position: 'relative',
-        top: 250,
-        backgroundColor: Colors.background,
-        height: '100%',
-        padding: 50,
-        borderTopLeftRadius: 50,
-        borderTopRightRadius: 50,
+        paddingVertical: 10,
+        fontSize: 14,
+        textAlign: 'center',
     },
-    StarterMessageContainer:
+    row:
     {
-        position: 'relative',
-        top: 200,
-        display: 'flex',
-        alignItems: 'center',
-    },
-    ImageContainer:
-    {
-        width: 261,
-        height: 319,
-        objectFit: 'fill',
+        padding: 10,
+        flexDirection: 'row',
+        gap: 25,
     },
 });
 

@@ -16,6 +16,26 @@ const styles = StyleSheet.create({
         fontSize: 30,
         color: Colors.textLight,
     },
+    description: {
+        textAlign: 'center',
+        fontWeight: '500',
+        fontSize: 12,
+        color: Colors.textLight,
+    },
+    subtitle: {
+        position: 'absolute',
+        bottom: 30,
+        textAlign: 'center',
+        fontWeight: '500',
+        fontSize: 12,
+        color: Colors.textLight,
+    },
+    power: {
+        textAlign: 'center',
+        fontWeight: '900',
+        fontSize: 14,
+        color: Colors.textLight,
+    },
 });
 
 export default styles;
