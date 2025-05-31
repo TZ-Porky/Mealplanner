@@ -7,9 +7,10 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 // --------------------------------------------------------------------//
 
 import HomeScreen from '../screens/Homescreen/HomeScreen';
+import PlannerScreen from '../screens/Planningscreen/PlannerScreen';
 // Placeholder components (à remplacer plus tard par les vrais)
 import {Colors} from '../styles/AppStyles';
-import styles from './MainTabNavigator';
+import styles from './MainTabNavigatorStyle';
 // --------------------------------------------------------------------//
 
 const Tab = createBottomTabNavigator();
@@ -33,6 +34,7 @@ function MarketScreen() {
   );
 }
 
+/*
 function PlanningScreen() {
   return (
     <View>
@@ -40,6 +42,7 @@ function PlanningScreen() {
     </View>
   );
 }
+*/
 
 function ProfileScreen() {
   return (
@@ -122,7 +125,7 @@ function MainTabNavigator() {
     <Tab.Navigator
       screenOptions={{headerShown: false}}
       tabBar={props => <CustomTabBar {...props} />}>
-      <Tab.Screen name="Planning" component={PlanningScreen} />
+      <Tab.Screen name="Planning" component={PlannerScreen} />
       <Tab.Screen name="Stocks" component={StocksScreen} />
       <Tab.Screen name="Add" component={HomeScreen} />
       <Tab.Screen name="Market" component={MarketScreen} />

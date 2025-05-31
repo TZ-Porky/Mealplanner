@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Colors } from '../styles/AppStyles';
-import PlanningMealModal from '../components/PlanningMealModal'; // On va créer cette modale
+import { Colors } from '../../styles/AppStyles';
+import PlanningMealModal from '../../components/modals/PlanningMealModal'; // On va créer cette modale
 
 // Configuration de la locale pour le calendrier (Français)
 LocaleConfig.locales.fr = {
