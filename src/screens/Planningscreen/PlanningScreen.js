@@ -1,29 +1,23 @@
-// screens/StocksScreen.js
+// screens/PlanningScreen.js
 import React from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, FlatList
+  View, Text, StyleSheet, TouchableOpacity
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, DrawerActions } from '@react-navigation/native';
 
-const ingredients = [
-  { id: '1', name: 'Tomatoes', qty: '60 Pics', price: '50 XCFA' },
-  { id: '2', name: 'Onions', qty: '30 Pics', price: '30 XCFA' },
-  { id: '3', name: 'Oil Bottle', qty: '4 Bottles', price: '200 XCFA' },
-  { id: '4', name: 'Salt', qty: '2 Packs', price: '100 XCFA' },
+const days = [
+  { name: 'Mon', date: 12 },
+  { name: 'Tue', date: 13 },
+  { name: 'Wed', date: 14 },
+  { name: 'Thu', date: 15 },
+  { name: 'Fri', date: 16 },
+  { name: 'Sat', date: 17 },
+  { name: 'Sun', date: 18 },
 ];
 
-const StocksScreen = () => {
+const PlanningScreen = () => {
   const navigation = useNavigation();
-
-  const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      <Ionicons name="nutrition-outline" size={24} color="#1976D2" />
-      <Text style={styles.name}>{item.name}</Text>
-      <Text style={styles.qty}>{item.qty}</Text>
-      <Text style={styles.price}>{item.price}</Text>
-    </View>
-  );
 
   return (
     <View style={styles.container}>
@@ -33,7 +27,7 @@ const StocksScreen = () => {
           <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
             <Ionicons name="menu" size={28} color="#333" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Stocks</Text>
+          <Text style={styles.headerTitle}>Planning</Text>
         </View>
         <View style={styles.rightIcons}>
           <TouchableOpacity style={styles.iconBtn}>
@@ -45,26 +39,28 @@ const StocksScreen = () => {
         </View>
       </View>
 
-      {/* List */}
-      <FlatList
-        contentContainerStyle={styles.list}
-        data={ingredients}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        renderItem={renderItem}
-      />
+      {/* Month */}
+      <Text style={styles.month}>May, 2025</Text>
+
+      {/* Calendar */}
+      <View style={styles.calendarRow}>
+        {days.map((day, index) => (
+          <View key={index} style={styles.dayBox}>
+            <Text style={styles.dayName}>{day.name}</Text>
+            <Text style={styles.dayDate}>{day.date}</Text>
+          </View>
+        ))}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#fff', paddingHorizontal: 16, paddingTop: 12 },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 12,
     marginBottom: 10,
   },
   headerLeft: {
@@ -84,36 +80,35 @@ const styles = StyleSheet.create({
   iconBtn: {
     marginLeft: 16,
   },
-  list: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-  },
-  card: {
-    flex: 1,
-    backgroundColor: '#fff',
-    margin: 8,
-    padding: 16,
-    borderRadius: 10,
-    elevation: 3,
-    alignItems: 'center',
-  },
-  name: {
+  month: {
     fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+    textAlign: 'center',
+    marginVertical: 12,
+  },
+  calendarRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  dayBox: {
+    width: 45,
+    backgroundColor: '#f2f2f2',
+    borderRadius: 8,
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  dayName: {
+    fontSize: 12,
     fontWeight: '600',
-    marginTop: 8,
     color: '#333',
   },
-  qty: {
-    fontSize: 13,
-    color: '#777',
-    marginTop: 4,
-  },
-  price: {
+  dayDate: {
     fontSize: 14,
-    color: '#1976D2',
-    fontWeight: 'bold',
-    marginTop: 4,
+    fontWeight: '600',
+    color: '#F57C00',
+    marginTop: 2,
   },
 });
 
-export default StocksScreen;
+export default PlanningScreen;

@@ -14,6 +14,9 @@ export default StyleSheet.create({
     paddingHorizontal: Layout.spacing.medium + 12,
     marginBottom: Layout.spacing.medium,
   },
+  tabContentArea:{
+    paddingHorizontal: Layout.spacing.medium,
+  },
   contentSection: {
     flex: 1, // Pour que le contenu prenne l'espace restant et soit défilable
     paddingHorizontal: Layout.spacing.medium + 32,

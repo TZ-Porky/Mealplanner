@@ -9,6 +9,8 @@ export default StyleSheet.create({
     backgroundColor: Colors.cardBackground,
     borderRadius: Layout.borderRadius.medium,
     paddingHorizontal: Layout.spacing.medium,
+    marginHorizontal: Layout.spacing.medium,
+    marginBottom: Layout.spacing.medium,
     height: 50,
     ...GlobalStyles.shadow,
   },

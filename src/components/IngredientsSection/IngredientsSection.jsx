@@ -7,23 +7,33 @@ import { Colors, Fonts } from '../../styles/AppStyles';
 
 const IngredientsSection = ({ ingredientsList, estimatedTotal }) => { // ingredientsList est maintenant les ingrédients mis à l'échelle
   // Initialisez checkedIngredients à partir des props reçues
-  const [checkedIngredients, setCheckedIngredients] = useState(
+  const [checkedIngredientsState, setCheckedIngredientsState] = useState(() =>
     ingredientsList.map(item => ({ ...item, checked: false }))
   );
 
+
   // Mettez à jour checkedIngredients lorsque ingredientsList change (e.g., quand les parts sont modifiées)
   useEffect(() => {
-    setCheckedIngredients(
-      ingredientsList.map(item => {
-        // Tente de conserver l'état "checked" si l'ingrédient existe déjà
-        const existing = checkedIngredients.find(ci => ci.id === item.id);
-        return { ...item, checked: existing ? existing.checked : false };
-      })
-    );
-  }, [checkedIngredients, ingredientsList]); // Re-crée la liste des ingrédients cochés si la liste des ingrédients change
+    // Ce useEffect s'exécutera lorsque ingredientsList change (par exemple, les parts changent)
+    // Nous devons fusionner la nouvelle ingredientsList avec l'état actuel des éléments cochés
+    // afin de préserver les coches pour les ingrédients qui existent toujours.
+    setCheckedIngredientsState(prevCheckedIngredients => {
+      return ingredientsList.map(newItem => {
+        const existingItem = prevCheckedIngredients.find(
+          oldItem => oldItem.id === newItem.id
+        );
+        // Si l'élément existe et était coché, gardez-le coché.
+        // Sinon, c'est un nouvel élément ou un élément qui n'était pas coché, donc par défaut à false.
+        return {
+          ...newItem,
+          checked: existingItem ? existingItem.checked : false,
+        };
+      });
+    });
+  }, [ingredientsList]);// Re-crée la liste des ingrédients cochés si la liste des ingrédients change
 
   const toggleCheckbox = (id) => {
-    setCheckedIngredients(prevState =>
+    setCheckedIngredientsState(prevState =>
       prevState.map(item =>
         item.id === id ? { ...item, checked: !item.checked } : item
       )
@@ -32,7 +42,7 @@ const IngredientsSection = ({ ingredientsList, estimatedTotal }) => { // ingredi
 
   return (
     <View>
-      {checkedIngredients.map((item, index) => (
+      {checkedIngredientsState.map((item, index) =>
         <View key={item.id} style={[styles.row, index === ingredientsList.length - 1 && styles.lastRow]}>
           <Text style={styles.ingredientText}>{item.name}</Text>
           <Text style={styles.quantityText}>{item.quantity} {item.unit}</Text> {/* Affiche aussi l'unité */}
@@ -45,7 +55,7 @@ const IngredientsSection = ({ ingredientsList, estimatedTotal }) => { // ingredi
             )}
           </TouchableOpacity>
         </View>
-      ))}
+      )}
       <View style={styles.totalRow}>
         <Text style={styles.totalText}>Total</Text>
         <Text style={styles.totalPrice}>{estimatedTotal} XCFA</Text>

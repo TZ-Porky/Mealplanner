@@ -26,6 +26,9 @@ export default StyleSheet.create({
     color: Colors.textDark,
     marginBottom: Layout.spacing.xSmall / 2,
   },
+  greetingTextHighlight: {
+    color: Colors.primaryOrange,
+  },
   questionText: {
     fontSize: Fonts.sizes.large,
     color: Colors.textMedium,

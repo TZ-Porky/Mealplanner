@@ -8,6 +8,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import HomeScreen from '../screens/Homescreen/HomeScreen';
 import PlannerScreen from '../screens/Planningscreen/PlannerScreen';
+import StocksScreen from '../screens/Stockscreen/StocksScreen';
+import MarketScreen from '../screens/Marketscreen/MarketScreen';
 // Placeholder components (à remplacer plus tard par les vrais)
 import {Colors} from '../styles/AppStyles';
 import styles from './MainTabNavigatorStyle';
@@ -18,6 +20,7 @@ const Tab = createBottomTabNavigator();
 // --------------------------------------------------------------------//
 // Temporary screen components (replace with real screens later)
 // --------------------------------------------------------------------//
+/*
 function StocksScreen() {
   return (
     <View>
@@ -25,7 +28,9 @@ function StocksScreen() {
     </View>
   );
 }
+*/
 
+/*
 function MarketScreen() {
   return (
     <View>
@@ -33,6 +38,7 @@ function MarketScreen() {
     </View>
   );
 }
+*/
 
 /*
 function PlanningScreen() {
@@ -125,10 +131,10 @@ function MainTabNavigator() {
     <Tab.Navigator
       screenOptions={{headerShown: false}}
       tabBar={props => <CustomTabBar {...props} />}>
-      <Tab.Screen name="Planning" component={PlannerScreen} />
-      <Tab.Screen name="Stocks" component={StocksScreen} />
-      <Tab.Screen name="Add" component={HomeScreen} />
+      <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Market" component={MarketScreen} />
+      <Tab.Screen name="Stocks" component={StocksScreen} />
+      <Tab.Screen name="Planning" component={PlannerScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

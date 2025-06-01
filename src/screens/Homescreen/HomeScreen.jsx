@@ -87,7 +87,9 @@ const HomeScreen = ({navigation}) => {
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         {/* Section de bienvenue */}
         <View style={styles.section}>
-          <Text style={styles.greetingText}>Hi, user!</Text>
+          <Text style={styles.greetingText}>Hi,
+            <Text style={styles.greetingTextHighlight}> user!</Text>
+            </Text>
           <Text style={styles.questionText}>
             Are we cooking something today?
           </Text>
@@ -186,7 +188,7 @@ const HomeScreen = ({navigation}) => {
             onPress={() => console.log('Recommend me a meal!')}
           />
         </View>
-        <View style={{height: Layout.spacing.xLarge}} /> {/* Marge en bas */}
+        <View style={{height: Layout.spacing.medium}} /> {/* Marge en bas */}
       </ScrollView>
     </View>
   );
