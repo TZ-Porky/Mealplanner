@@ -20,35 +20,14 @@ const Tab = createBottomTabNavigator();
 // --------------------------------------------------------------------//
 // Temporary screen components (replace with real screens later)
 // --------------------------------------------------------------------//
-/*
-function StocksScreen() {
-  return (
-    <View>
-      <Text>Stocks Page</Text>
-    </View>
-  );
-}
-*/
 
-/*
-function MarketScreen() {
+function CourseListScreen() {
   return (
     <View>
-      <Text>Market Page</Text>
+      <Text>Course List Page</Text>
     </View>
   );
 }
-*/
-
-/*
-function PlanningScreen() {
-  return (
-    <View>
-      <Text>Planning Page</Text>
-    </View>
-  );
-}
-*/
 
 function ProfileScreen() {
   return (
@@ -57,6 +36,7 @@ function ProfileScreen() {
     </View>
   );
 }
+
 
 // --------------------------------------------------------------------//
 // Tab bar icon and style configuration
@@ -97,6 +77,9 @@ function CustomTabBar({state, descriptors, navigation}) {
           case 'Stocks':
             iconName = isFocused ? 'cube' : 'cube-outline';
             break;
+          case 'Courses':
+            iconName = isFocused ? 'receipt' : 'receipt-outline';
+            break;
         }
 
         return (
@@ -135,6 +118,7 @@ function MainTabNavigator() {
       <Tab.Screen name="Market" component={MarketScreen} />
       <Tab.Screen name="Stocks" component={StocksScreen} />
       <Tab.Screen name="Planning" component={PlannerScreen} />
+      <Tab.Screen name="Courses" component={CourseListScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

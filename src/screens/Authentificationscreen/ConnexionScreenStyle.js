@@ -94,6 +94,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   rowAuth: {
+    justifyContent: 'center',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
