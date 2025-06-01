@@ -3,7 +3,7 @@ import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import styles from './MealCardPlanStyles';
 
-const MealPlanCard = ({ imageSource, mealType, description, time, onPress }) => {
+const MealCardPlan = ({ imageSource, mealType, description, time, onPress }) => {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       <Image source={imageSource} style={styles.image} />
@@ -16,4 +16,4 @@ const MealPlanCard = ({ imageSource, mealType, description, time, onPress }) => 
   );
 };
 
-export default MealPlanCard;
+export default MealCardPlan;

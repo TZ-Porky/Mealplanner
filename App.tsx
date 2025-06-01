@@ -9,6 +9,7 @@ import LandingScreen from './src/screens/Landingscreen/LandingScreen';
 import ConnexionScreen from './src/screens/Authentificationscreen/ConnexionScreen';
 import InscriptionScreen from './src/screens/Authentificationscreen/InscriptionScreen';
 import RecipeDetailScreen from './src/screens/RecipeDetailScreen/RecipeDetailScreen';
+import AddMealScreen from './src/screens/AddMealScreen/AddMealScreen';
 import SetupNavigator from './src/navigation/SetupNavigator';
 
 const Stack = createNativeStackNavigator();
@@ -19,6 +20,7 @@ function RootStack() {
       <Stack.Screen name="/" component={SplashScreen} />
       <Stack.Screen name="Land" component={LandingScreen} />
       <Stack.Screen name="SignIn" component={ConnexionScreen} />
+      <Stack.Screen name="AddMeal" component={AddMealScreen} />
       <Stack.Screen name="SignUp" component={InscriptionScreen} />
       <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
       <Stack.Screen name="Setup" component={SetupNavigator} />

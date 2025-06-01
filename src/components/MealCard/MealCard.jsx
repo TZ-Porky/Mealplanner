@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './MealCardStyles';
 import { Fonts } from '../../styles/AppStyles';
 
-const MealCard = ({ meal, onPress }) => { // Prend un objet 'meal' complet
+const MealCard = ({ meal, onPress }) => {
   return (
     <TouchableOpacity style={styles.cardContainer} onPress={() => onPress(meal)}>
       <Image source={meal.image} style={styles.image} resizeMode="cover" />

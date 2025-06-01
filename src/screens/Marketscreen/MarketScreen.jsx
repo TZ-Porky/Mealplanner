@@ -88,8 +88,7 @@ const MarketScreen = ({ navigation }) => {
   };
 
   const handleAddMeal = () => {
-    Alert.alert('Add Meal', 'Navigate to add new meal screen or open a form.');
-    // Ici, vous navigueriez vers un écran d'ajout de nouvelle recette
+    navigation.navigate('AddMeal');
   };
 
   // Composant d'en-tête de la liste pour la FlatList

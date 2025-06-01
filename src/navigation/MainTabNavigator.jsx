@@ -7,8 +7,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 // --------------------------------------------------------------------//
 
 import HomeScreen from '../screens/Homescreen/HomeScreen';
-import PlannerScreen from '../screens/Planningscreen/PlannerScreen';
-import StocksScreen from '../screens/Stockscreen/StocksScreen';
+import PlannerScreen from '../screens/Planningscreen/PlanningScreen';
+import StocksScreen from '../screens/Stockscreen/StockScreen';
 import MarketScreen from '../screens/Marketscreen/MarketScreen';
 // Placeholder components (à remplacer plus tard par les vrais)
 import {Colors} from '../styles/AppStyles';

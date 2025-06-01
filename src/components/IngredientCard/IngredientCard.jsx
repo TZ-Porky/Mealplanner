@@ -1,38 +1,36 @@
-// src/components/IngredientCard/IngredientCard.js
 import React from 'react';
-import {View, Text, TouchableOpacity, Image} from 'react-native';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './IngredientCardStyles';
-import Icon from 'react-native-vector-icons/FontAwesome5'; // Importez Ionicons
-import {Colors, Fonts} from '../../styles/AppStyles';
+import { Fonts } from '../../styles/AppStyles';
 
-const IngredientCard = ({
-  imageSource,
-  name,
-  pics,
-  price,
-  onPress,
-}) => {
+const IngredientCard = ({ ingredient, onIncrease, onDecrease, onDelete }) => {
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress}>
-      <View style={styles.iconWrapper}>
-        <Image source={imageSource} style={styles.ingredientIcon} />
+    <View style={styles.cardContainer}>
+      <View style={styles.image}>
+        {/* L'image de l'ingrédient sera passée par la prop ingredient.image */}
+        {ingredient.image && <Image source={ingredient.image} style={styles.ingredientImage} />}
       </View>
-      <Text style={styles.name}>{name}</Text>
-      <View style={styles.details}>
-        <View style={styles.detailItem}>
-          <Icon name="box" size={Fonts.sizes.small} color={Colors.textMedium} />
-          <Text style={styles.detailText}>{pics} Pics</Text>
-        </View>
-        <View style={styles.detailItem}>
-          <Icon
-            name="money-bill"
-            size={Fonts.sizes.small}
-            color={Colors.textMedium}
-          />
-          <Text style={styles.detailText}>{price} XCFA</Text>
-        </View>
+      <View style={styles.infoContainer}>
+        <Text style={styles.ingredientName}>{ingredient.name}</Text>
+        <Text style={styles.ingredientPrice}>{ingredient.price} XCFA</Text>
       </View>
-    </TouchableOpacity>
+      <View style={styles.actionsContainer}>
+        <View style={styles.quantityControls}>
+          <TouchableOpacity onPress={() => onDecrease(ingredient.id)} style={styles.quantityButton}>
+            <Text style={styles.quantityButtonText}>-</Text>
+          </TouchableOpacity>
+          {/* Affichez la quantité actuelle de l'ingrédient */}
+          <Text style={styles.quantityText}>{ingredient.quantity} Pics</Text>
+          <TouchableOpacity onPress={() => onIncrease(ingredient.id)} style={styles.quantityButton}>
+            <Text style={styles.quantityButtonText}>+</Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity onPress={() => onDelete(ingredient.id)} style={styles.deleteButton}>
+          <Icon name="trash-outline" size={Fonts.sizes.large} style={styles.deleteIcon} />
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
 

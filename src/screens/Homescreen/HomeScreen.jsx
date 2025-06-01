@@ -10,9 +10,9 @@ import Icon from 'react-native-vector-icons/Ionicons';
 // Composantes
 import Header from '../../components/header/Header';
 import RecipeCard from '../../components/RecipeCard/RecipeCard';
-import IngredientCard from '../../components/IngredientCard/IngredientCard';
+import IngredientCard from '../../components/IngredientPlanCard/IngredientPlanCard';
 import DateSelector from '../../components/DateSelector/DateSelector';
-import MealPlanCard from '../../components/MealCardPlan/MealCardPlan';
+import MealCardPlan from '../../components/MealCardPlan/MealCardPlan';
 import RecommendButton from '../../components/RecommendButton/RecommendButton';
 // Styles
 import styles from './HomeScreenStyle';
@@ -172,7 +172,7 @@ const HomeScreen = ({navigation}) => {
           <DateSelector /> {/* Utilisation du composant DateSelector */}
           <View style={styles.mealPlanDetails}>
             {plannedMeals.map(meal => (
-              <MealPlanCard
+              <MealCardPlan
                 key={meal.id}
                 imageSource={meal.image}
                 mealType={meal.type}
