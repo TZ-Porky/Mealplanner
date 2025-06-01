@@ -61,6 +61,13 @@ const RecipeDetailScreen = ({ navigation, route }) => {
   // qui seraient normalement récupérés via un ID
   const { recipe } = route.params; // `recipe` contient id, image, name, rating, time, price, tags
 
+  // L'ID de la recette est utilisé pour "charger" les détails complets (ici, en les sélectionnant depuis `detailedRecipeData`)
+  // Dans une vraie app, ce serait un appel API : `fetchRecipeDetails(recipe.id)`
+  const currentRecipeDetails = detailedRecipeData.id === recipe.id ? detailedRecipeData : { ...recipe, // Fallback ou charger d'autres données
+    cookware: [], ingredients: [], instructions: [], servings: parseInt(recipe.servings || '1', 10),
+    baseIngredients: [], estimatedIngredientsTotal: 0
+  };
+
   // Initialisez les parts avec la valeur passée ou la valeur par défaut du détaillé
   const initialServings = parseInt(recipe.servings, 10) || detailedRecipeData.servings;
   const [currentServings, setCurrentServings] = useState(initialServings);
@@ -70,8 +77,8 @@ const RecipeDetailScreen = ({ navigation, route }) => {
   // Fonction pour mettre à l'échelle les ingrédients
   const scaleIngredients = (servings) => {
     // Utilisez les `baseIngredients` de `detailedRecipeData`
-    const scaleFactor = servings / detailedRecipeData.servings;
-    return detailedRecipeData.baseIngredients.map(ing => {
+    const scaleFactor = servings / currentRecipeDetails.servings;
+    return currentRecipeDetails.baseIngredients.map(ing => {
       // Pour l'affichage, on peut arrondir ou formater
       const scaledQuantity = ing.quantity * scaleFactor;
       return {
@@ -85,12 +92,14 @@ const RecipeDetailScreen = ({ navigation, route }) => {
   useEffect(() => {
     // Mettre à jour les ingrédients mis à l'échelle lorsque les parts changent
     setScaledIngredients(scaleIngredients(currentServings));
-  }, [currentServings]); // Se déclenche quand currentServings change
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentServings, currentRecipeDetails.id]); // Se déclenche quand currentServings change
 
   // Initialiser les ingrédients lors du premier rendu de l'écran
   useEffect(() => {
     setScaledIngredients(scaleIngredients(initialServings));
-  }, [initialServings]); // Se déclenche une seule fois au montage du composant
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialServings, currentRecipeDetails.id]);  // Se déclenche une seule fois au montage du composant
 
 
   const handleIncreaseServings = () => {
@@ -154,12 +163,11 @@ const RecipeDetailScreen = ({ navigation, route }) => {
     // Le `contentContainerStyle` permet le défilement si le contenu dépasse la hauteur.
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
        <RecipeDetailHeader
-        imageSource={displayRecipe.image}
-        title={displayRecipe.title}
-        rating={displayRecipe.rating}
-        time={displayRecipe.time}
-        // servings={displayRecipe.servings} // Ne pas passer `servings` ici si le ServingsSelector est interne
-        price={displayRecipe.price}
+        imageSource={currentRecipeDetails.image}
+        title={currentRecipeDetails.name}
+        rating={currentRecipeDetails.rating}
+        time={currentRecipeDetails.time}
+        price={currentRecipeDetails.price}
         onGoBack={() => navigation.goBack()}
         onShare={() => console.log('Share Recipe')}
         currentServings={currentServings} // Passe l'état des parts au sélecteur

@@ -11,7 +11,7 @@ import { GlobalStyles } from '../../styles/AppStyles'; // Vérifiez toujours ce 
 const DUMMY_MEALS = [
   // ... (vos données DUMMY_MEALS restent inchangées)
   {
-    id: 'welsh-rabbit',
+    id: 'meal1',
     name: 'Welsh Rabbit (Homemade)',
     image: require('../../../assets/images/meal-1.png'),
     ingredientsDesc: 'Classic cheese toast',
@@ -93,6 +93,7 @@ const MarketScreen = ({ navigation }) => {
   };
 
   // Composant d'en-tête de la liste pour la FlatList
+  // eslint-disable-next-line react/no-unstable-nested-components
   const ListHeader = () => (
     <View>
       <MarketHeader
@@ -122,6 +123,7 @@ const MarketScreen = ({ navigation }) => {
   );
 
   // Composant de pied de page pour la FlatList (contiendra le bouton "Add Meal")
+  // eslint-disable-next-line react/no-unstable-nested-components
   const ListFooter = () => (
     <View style={styles.footerButtonContainer}>
       <AddMealButton onPress={handleAddMeal} />
