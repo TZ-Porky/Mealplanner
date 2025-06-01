@@ -3,7 +3,7 @@ import { Colors, Fonts, Layout, GlobalStyles } from '../../styles/AppStyles';
 
 export default StyleSheet.create({
   cardContainer: {
-    backgroundColor: Colors.panelBackground,
+    backgroundColor: Colors.blankBackground,
     borderRadius: Layout.borderRadius.medium,
     marginBottom: Layout.spacing.medium,
     marginHorizontal: Layout.spacing.medium, // Pour espacer les cartes
@@ -87,6 +87,6 @@ export default StyleSheet.create({
     marginRight: Layout.spacing.xSmall,
   },
   starIcon: {
-    color: Colors.starYellow, // Couleur or pour l'étoile
+    color: Colors.primaryYellow, // Couleur or pour l'étoile
   },
 });

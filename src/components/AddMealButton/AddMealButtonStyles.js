@@ -3,9 +3,10 @@ import { Colors, Fonts, Layout, GlobalStyles } from '../../styles/AppStyles';
 
 export default StyleSheet.create({
   buttonContainer: {
-    position: 'relative', // Bouton flottant
+    width: '90%',
     bottom: Layout.spacing.large,
     alignSelf: 'center',
+    justifyContent: 'center',
     backgroundColor: Colors.primaryOrange,
     borderRadius: Layout.borderRadius.large,
     paddingVertical: Layout.spacing.medium,

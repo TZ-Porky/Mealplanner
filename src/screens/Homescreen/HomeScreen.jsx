@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 // Composantes
 import Header from '../../components/header/Header';
 import RecipeCard from '../../components/RecipeCard/RecipeCard';
@@ -15,7 +16,7 @@ import MealPlanCard from '../../components/MealCardPlan/MealCardPlan';
 import RecommendButton from '../../components/RecommendButton/RecommendButton';
 // Styles
 import styles from './HomeScreenStyle';
-import {Layout} from '../../styles/AppStyles';
+import {Layout, Colors} from '../../styles/AppStyles';
 // Images des ingrédients
 import tomatoIcon from '../../../assets/images/tomato.png';
 import breadIcon from '../../../assets/images/bread.png';
@@ -104,7 +105,7 @@ const HomeScreen = ({navigation}) => {
               placeholderTextColor="#999"
             />
             <TouchableOpacity style={styles.searchIconContainer}>
-              {/* Icône de recherche ici */}
+              <Icon name="search-outline" size={24} color={Colors.textMedium} />
             </TouchableOpacity>
           </View>
         </View>
