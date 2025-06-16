@@ -1,64 +1,92 @@
+/* eslint-disable react-native/no-inline-styles */
 // src/components/IngredientsSection/IngredientsSection.js
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {View, Text, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './IngredientsSectionStyles';
-import { Colors, Fonts } from '../../styles/AppStyles';
+import {Colors, Fonts} from '../../styles/AppStyles';
 
-const IngredientsSection = ({ ingredientsList, estimatedTotal }) => { // ingredientsList est maintenant les ingrédients mis à l'échelle
+const IngredientsSection = ({ingredients = []}) => {
+  // Removed estimatedTotal from props as it will be calculated
   // Initialisez checkedIngredients à partir des props reçues
   const [checkedIngredientsState, setCheckedIngredientsState] = useState(() =>
-    ingredientsList.map(item => ({ ...item, checked: false }))
+    ingredients.map(item => ({
+      ...item,
+      id: item.name, // Use name as a unique identifier for checklist purposes
+      checked: false,
+    })),
   );
 
-
-  // Mettez à jour checkedIngredients lorsque ingredientsList change (e.g., quand les parts sont modifiées)
+  // Mettez à jour checkedIngredients lorsque ingredients change (e.g., quand les parts sont modifiées)
   useEffect(() => {
-    // Ce useEffect s'exécutera lorsque ingredientsList change (par exemple, les parts changent)
-    // Nous devons fusionner la nouvelle ingredientsList avec l'état actuel des éléments cochés
-    // afin de préserver les coches pour les ingrédients qui existent toujours.
     setCheckedIngredientsState(prevCheckedIngredients => {
-      return ingredientsList.map(newItem => {
+      return ingredients.map(newItem => {
         const existingItem = prevCheckedIngredients.find(
-          oldItem => oldItem.id === newItem.id
+          oldItem => oldItem.id === newItem.name, // Compare with newItem.name
         );
-        // Si l'élément existe et était coché, gardez-le coché.
-        // Sinon, c'est un nouvel élément ou un élément qui n'était pas coché, donc par défaut à false.
         return {
           ...newItem,
+          id: newItem.name, // Ensure new items also have name as id
           checked: existingItem ? existingItem.checked : false,
         };
       });
     });
-  }, [ingredientsList]);// Re-crée la liste des ingrédients cochés si la liste des ingrédients change
+  }, [ingredients]);
 
-  const toggleCheckbox = (id) => {
+  const toggleCheckbox = id => {
     setCheckedIngredientsState(prevState =>
       prevState.map(item =>
-        item.id === id ? { ...item, checked: !item.checked } : item
-      )
+        item.id === id ? {...item, checked: !item.checked} : item,
+      ),
     );
+  };
+
+  // Calculate the total estimated cost
+  const calculateTotalCost = () => {
+    return checkedIngredientsState.reduce((total, item) => {
+      if (item.checked && item.unitCost && item.quantity) {
+        return total + item.unitCost * item.quantity;
+      }
+      return total;
+    }, 0);
   };
 
   return (
     <View>
-      {checkedIngredientsState.map((item, index) =>
-        <View key={item.id} style={[styles.row, index === ingredientsList.length - 1 && styles.lastRow]}>
+      {checkedIngredientsState.map((item, index) => (
+        <View
+          key={item.id}
+          style={[
+            styles.row,
+            index === ingredients.length - 1 && styles.lastRow,
+          ]}>
           <Text style={styles.ingredientText}>{item.name}</Text>
-          <Text style={styles.quantityText}>{item.quantity} {item.unit}</Text> {/* Affiche aussi l'unité */}
+          <Text style={styles.quantityText}>
+            {typeof item.quantity === 'number' ? item.quantity.toFixed(2) : '—'}{' '}
+            {item.unitOfMeasure || ''}
+          </Text>
+
           <TouchableOpacity
             style={[styles.checkbox, item.checked && styles.checkedCheckbox]}
-            onPress={() => toggleCheckbox(item.id)}
-          >
+            onPress={() => toggleCheckbox(item.id)}>
             {item.checked && (
-              <Icon name="checkmark" size={Fonts.sizes.medium} color={Colors.textLight} style={styles.checkboxIcon} />
+              <Icon
+                name="checkmark"
+                size={Fonts.sizes.medium}
+                color={Colors.textLight}
+                style={styles.checkboxIcon}
+              />
             )}
           </TouchableOpacity>
         </View>
-      )}
+      ))}
       <View style={styles.totalRow}>
-        <Text style={styles.totalText}>Total</Text>
-        <Text style={styles.totalPrice}>{estimatedTotal} XCFA</Text>
+        <Text style={styles.totalText}>
+          Total
+        </Text>
+        <Text style={styles.totalPrice}>
+          {calculateTotalCost().toFixed(2)} XCFA
+        </Text>
       </View>
     </View>
   );

@@ -1,188 +1,156 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Alert } from 'react-native';
+import { ScrollView, View, Alert, ActivityIndicator, Text } from 'react-native';
 import RecipeDetailHeader from '../../components/RecipeDetailHeader/RecipeDetailHeader';
-import GenerateShoppingListButton from '../../components/GenerateShoppingListButton/GenerateShoppingListButton'; // Renamed from GeneralShoppingListButton
+import GenerateShoppingListButton from '../../components/GenerateShoppingListButton/GenerateShoppingListButton';
 import TabButton from '../../components/TabButton/TabButton';
 import CookwareSection from '../../components/CookwareSection/CookwareSection';
 import IngredientsSection from '../../components/IngredientsSection/IngredientsSection';
 import InstructionsSection from '../../components/InstructionsSection/InstructionsSection';
 import styles from './RecipeDetailScreenStyles';
+import RecipeServices from '../../services/RecipeServices'; // Importez le service de recettes
 
-// --- IMPORTANT: Redéfinition des données de la recette avec des quantités numériques ---
-// Cette `baseRecipeData` devrait être votre source de vérité pour une recette complète,
-// que vous récupéreriez normalement d'une API en utilisant `recipe.id` de `route.params`.
-// Pour l'exemple, nous la définissons ici.
-const detailedRecipeData = {
-  id: 'welsh-rabbit',
-  image: require('../../../assets/images/meal-1.png'), // Change if your actual image path is different
-  title: 'Welsh Rabbit (Homemade)',
-  rating: 5,
-  time: '1 hour 30 Minutes',
-  servings: 6, // Numérique pour les calculs de parts
-  price: '7,500 XCFA',
-  cookware: [
-    { id: 'cw1', name: 'Saucepan', quantity: 1, price: 3000 },
-    { id: 'cw2', name: 'Stockpot', quantity: 1, price: 7000 },
-    { id: 'cw3', name: 'Pot', quantity: 1, price: 6000 },
-    { id: 'cw4', name: 'Spoon', quantity: 2, price: 300 },
-    { id: 'cw5', name: 'Plate', quantity: 2, price: 500 },
-  ],
-  // Définissez les ingrédients avec des quantités numériques et des unités pour le calcul
-  baseIngredients: [
-    { id: 'ing1', name: 'Ingredient Name 1', quantity: 0.5, unit: 'cup' },
-    { id: 'ing2', name: 'Ingredient Name 2', quantity: 1.0, unit: 'tablespoon' },
-    { id: 'ing3', name: 'Ingredient Name 3', quantity: 200, unit: 'g' },
-    { id: 'ing4', name: 'Ingredient Name 4', quantity: 3, unit: 'pieces' },
-    { id: 'ing5', name: 'Ingredient Name 5', quantity: 0.25, unit: 'cup' },
-    { id: 'ing6', name: 'Ingredient Name 6', quantity: 50, unit: 'ml' },
-  ],
-  estimatedIngredientsTotal: 7500, // Total affiché sur l'image pour les ingrédients
-  instructions: [
-    { id: 'ins1', stepNumber: 1, time: '15 Minutes', description: 'Boil chicken until it falls apart, then shred. Mix 1/2 cup of sauce and a little cheese with chicken.' },
-    { id: 'ins2', stepNumber: 2, time: '30 Minutes', description: 'Put other 1/2 can on bottom of 11x9 baking dish. Microwave tortillas until soft.' },
-    { id: 'ins3', stepNumber: 3, time: '1h15 Minutes', description: 'Put other 1/2 can on bottom of 11x9 baking dish. Microwave tortillas until soft.' },
-  ],
-};
-
-// SIMULATION DE STOCK (pour le bouton de liste de courses)
-// Les unités doivent correspondre aux unités des ingrédients
-const mockStock = {
-    'Ingredient Name 1': 0.2, // en cups
-    'Ingredient Name 2': 0.5, // en tablespoons
-    'Ingredient Name 3': 100, // en g
-    'Ingredient Name 4': 1,   // en pieces
-    'Ingredient Name 5': 0.0, // en cups
-    'Ingredient Name 6': 20,  // en ml
-};
-
-const RecipeDetailScreen = ({ navigation, route }) => {
-  // Utilisez les données passées par la navigation comme base,
-  // et combinez-les avec les détails complets (cookware, baseIngredients, instructions)
-  // qui seraient normalement récupérés via un ID
-  const { recipe } = route.params; // `recipe` contient id, image, name, rating, time, price, tags
-
-  // L'ID de la recette est utilisé pour "charger" les détails complets (ici, en les sélectionnant depuis `detailedRecipeData`)
-  // Dans une vraie app, ce serait un appel API : `fetchRecipeDetails(recipe.id)`
-  const currentRecipeDetails = detailedRecipeData.id === recipe.id ? detailedRecipeData : { ...recipe, // Fallback ou charger d'autres données
-    cookware: [], ingredients: [], instructions: [], servings: parseInt(recipe.servings || '1', 10),
-    baseIngredients: [], estimatedIngredientsTotal: 0
-  };
-
-  // Initialisez les parts avec la valeur passée ou la valeur par défaut du détaillé
-  const initialServings = parseInt(recipe.servings, 10) || detailedRecipeData.servings;
-  const [currentServings, setCurrentServings] = useState(initialServings);
-  const [scaledIngredients, setScaledIngredients] = useState([]);
+const RecipeDetailScreen = ({ route, navigation }) => {
+  const { recipeId } = route.params;
+  const [currentRecipeDetails, setCurrentRecipeDetails] = useState(null);
+  const [currentServings, setCurrentServings] = useState(1); // État pour les portions
   const [activeTab, setActiveTab] = useState('Cookware');
-
-  // Fonction pour mettre à l'échelle les ingrédients
-  const scaleIngredients = (servings) => {
-    // Utilisez les `baseIngredients` de `detailedRecipeData`
-    const scaleFactor = servings / currentRecipeDetails.servings;
-    return currentRecipeDetails.baseIngredients.map(ing => {
-      // Pour l'affichage, on peut arrondir ou formater
-      const scaledQuantity = ing.quantity * scaleFactor;
-      return {
-        ...ing,
-        quantity: scaledQuantity, // Garder le nombre pour le calcul du shopping list
-        displayQuantity: scaledQuantity.toFixed(1), // Pour l'affichage
-      };
-    });
-  };
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Mettre à jour les ingrédients mis à l'échelle lorsque les parts changent
-    setScaledIngredients(scaleIngredients(currentServings));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentServings, currentRecipeDetails.id]); // Se déclenche quand currentServings change
+    const fetchRecipe = async () => {
+      try {
+        setLoading(true);
+        const recipe = await RecipeServices.getRecipeById(recipeId);
+        if (recipe) {
+          setCurrentRecipeDetails(recipe);
+          setCurrentServings(recipe.servings); // Initialise avec les portions de la recette
+        } else {
+          setError('Recette introuvable.');
+        }
+      } catch (err) {
+        console.error('Erreur lors du chargement de la recette :', err);
+        setError('Impossible de charger la recette. Veuillez réessayer plus tard.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Initialiser les ingrédients lors du premier rendu de l'écran
-  useEffect(() => {
-    setScaledIngredients(scaleIngredients(initialServings));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialServings, currentRecipeDetails.id]);  // Se déclenche une seule fois au montage du composant
-
+    fetchRecipe();
+  }, [recipeId]);
 
   const handleIncreaseServings = () => {
-    setCurrentServings(prevServings => prevServings + 1);
-  };
-
-  const handleDecreaseServings = () => {
-    setCurrentServings(prevServings => Math.max(1, prevServings - 1)); // Minimum 1 part
-  };
-
-  const handleGenerateShoppingList = () => {
-    let shoppingListItems = [];
-    scaledIngredients.forEach(ingredient => {
-      const required = ingredient.quantity; // Utiliser la quantité numérique
-      const inStock = mockStock[ingredient.name] || 0;
-
-      if (required > inStock) {
-        const needed = required - inStock;
-        // Formatage pour l'affichage de la liste
-        shoppingListItems.push(`${needed.toFixed(1)} ${ingredient.unit || ''} ${ingredient.name}`);
-      }
-    });
-
-    if (shoppingListItems.length > 0) {
-      Alert.alert(
-        'Shopping List',
-        'You need to buy:\n\n' + shoppingListItems.join('\n'),
-        [{ text: 'OK' }]
-      );
-    } else {
-      Alert.alert('Shopping List', 'You have all the ingredients in stock!', [{ text: 'OK' }]);
+    if (currentRecipeDetails) {
+      setCurrentServings(prev => prev + 1);
     }
   };
 
-  // Le `fullRecipeData` est maintenant une combinaison de `recipe` et `detailedRecipeData`
-  // Surtout pour les champs que `recipe` de la navigation ne contient pas
-  const displayRecipe = {
-    ...detailedRecipeData, // Détails complets comme cookware, instructions
-    ...recipe, // Écrase les champs communs avec ceux passés par la navigation (image, title, rating, etc.)
-    // Assurez-vous que `servings` est un nombre ici pour `RecipeDetailHeader`
-    servings: currentServings, // On utilise l'état local des parts
+  const handleDecreaseServings = () => {
+    if (currentRecipeDetails && currentServings > 1) {
+      setCurrentServings(prev => prev - 1);
+    }
   };
 
+  const handleGenerateShoppingList = () => {
+    if (currentRecipeDetails) {
+      Alert.alert(
+        'Générer la liste de courses',
+        `Vous allez générer une liste de courses pour "${currentRecipeDetails.nom}" pour ${currentServings} portions.`,
+        [{ text: 'OK' }]
+      );
+    }
+  };
 
   const renderContent = () => {
+    if (!currentRecipeDetails) {return null;}
+
+    // Calculs ajustés pour les propriétés du modèle Recette
+    const adjustedCookware = currentRecipeDetails.utensils.map(item => ({
+      ...item,
+      quantity: item.quantity, // Utilise la propriété 'quantite' du modèle Ustensile
+    }));
+
+    const adjustedIngredients = currentRecipeDetails.ingredients.map(item => ({
+      ...item,
+      quantity:
+        currentRecipeDetails.servings > 0
+          ? (item.quantity / currentRecipeDetails.servings) * currentServings
+          : item.quantity,
+      unitOfMeasure: item.unitOfMeasure,
+      unitCost: item.unitCost,
+    }));
+
     switch (activeTab) {
       case 'Cookware':
-        return <CookwareSection cookwareList={detailedRecipeData.cookware} />;
+        return <CookwareSection cookwareList={adjustedCookware} />;
       case 'Ingredients':
-        return <IngredientsSection ingredientsList={scaledIngredients} estimatedTotal={detailedRecipeData.estimatedIngredientsTotal} />;
+        return <IngredientsSection ingredients={adjustedIngredients} />;
       case 'Instructions':
-        return <InstructionsSection instructionsList={detailedRecipeData.instructions} />;
+        return <InstructionsSection instructionsList={currentRecipeDetails.instructions} />;
       default:
         return null;
     }
   };
 
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#f3c09e" />
+        <Text style={{ marginTop: 10 }}>Chargement de la recette...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={{ color: 'red', textAlign: 'center' }}>{error}</Text>
+      </View>
+    );
+  }
+
+  if (!currentRecipeDetails) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text>Aucune recette disponible.</Text>
+      </View>
+    );
+  }
+
+  // Calcul du temps et du coût pour l'affichage dans le header
+  const timeInHours = Math.floor(currentRecipeDetails.preparationTimeMinutes / 60);
+  const timeInMinutes = currentRecipeDetails.preparationTimeMinutes % 60;
+  const formattedTime = (timeInHours > 0 ? `${timeInHours}h ` : '') + (timeInMinutes > 0 ? `${timeInMinutes}min` : '');
+
+  // Le prix doit être recalculé si les portions changent, en fonction du coût unitaire des ingrédients
+  // Le calcul de calculerCoutPreparation() est déjà dynamique dans le modèle Recette
+  const displayPrice = `${currentRecipeDetails.calculateTotalCost().toFixed(2)} XCFA`;
+
+
   return (
-    // Le ScrollView doit envelopper tout le contenu défilable, y compris l'en-tête, les onglets et le contenu des onglets.
-    // Le style `flex: 1` sur le ScrollView lui permet de prendre toute la hauteur disponible.
-    // Le `contentContainerStyle` permet le défilement si le contenu dépasse la hauteur.
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-       <RecipeDetailHeader
-        imageSource={currentRecipeDetails.image}
-        title={currentRecipeDetails.name}
+    <ScrollView style={styles.container}>
+      <RecipeDetailHeader
+        image={currentRecipeDetails.imageUrl ? { uri: currentRecipeDetails.imageUrl } : require('../../../assets/images/meal-1.png')}
+        title={currentRecipeDetails.title}
         rating={currentRecipeDetails.rating}
-        time={currentRecipeDetails.time}
-        price={currentRecipeDetails.price}
+        time={formattedTime}
+        price={displayPrice}
         onGoBack={() => navigation.goBack()}
         onShare={() => console.log('Share Recipe')}
-        currentServings={currentServings} // Passe l'état des parts au sélecteur
+        currentServings={currentServings}
         onServingsIncrease={handleIncreaseServings}
         onServingsDecrease={handleDecreaseServings}
       />
 
       <View style={styles.tabsContainer}>
         <TabButton
-          title="Cookware"
+          title="Ustensiles"
           isActive={activeTab === 'Cookware'}
           onPress={() => setActiveTab('Cookware')}
         />
         <TabButton
-          title="Ingredients"
+          title="Ingrédients"
           isActive={activeTab === 'Ingredients'}
           onPress={() => setActiveTab('Ingredients')}
         />
@@ -193,14 +161,12 @@ const RecipeDetailScreen = ({ navigation, route }) => {
         />
       </View>
 
-      {/* Le contenu des onglets doit être directement rendu ici pour éviter un ScrollView imbriqué inutile */}
       <View style={styles.tabContentArea}>
         {renderContent()}
       </View>
 
-      {/* Nouveau bouton de liste de courses en bas du ScrollView */}
       <View style={styles.generateListButtonContainer}>
-          <GenerateShoppingListButton onPress={handleGenerateShoppingList} />
+        <GenerateShoppingListButton onPress={handleGenerateShoppingList} />
       </View>
     </ScrollView>
   );

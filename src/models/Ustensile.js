@@ -1,9 +1,18 @@
 class Ustensile {
-  constructor(nom, quantité, prixUnitaire, imageUrl = null) {
-    this.nom = nom; //
-    this.quantité = quantité; //
-    this.prixUnitaire = prixUnitaire; //
-    this.imageUrl = imageUrl; // Image ou illustration (Optionnelle)
+  constructor(name, quantity) {
+    this.name = name;
+    this.quantity = quantity;
+  }
+
+  toPlainObject() {
+    return {
+      name: this.name,
+      quantity: this.quantity,
+    };
+  }
+
+  static fromFirestore(data) {
+    return new Ustensile(data.name, data.quantity);
   }
 }
 

@@ -1,386 +1,184 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState} from 'react';
 import {
   View,
   Text,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
   StyleSheet,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
-import {Picker} from '@react-native-picker/picker';
+
+import React, { useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import RecipeServices from '../../services/RecipeServices'; // Importe le service de recette
+import Recette from '../../models/Recette'; // Importe le modèle Recette
+import AuthServices from '../../services/AuthServices'; // Pour obtenir l'UID de l'utilisateur
+import StepRecipeBasicInfo from './AddSteps/StepRecipeBasicInfo';
+import StepRecipeIngredients from './AddSteps/StepRecipeIngredients';
+import StepRecipeUstensils from './AddSteps/StepRecipeUstensils';
+import StepRecipeInstructions from './AddSteps/StepRecipeInstructions';
+import StepRecipeTagsAndFinish from './AddSteps/StepRecipeTagsAndFinish';
+
+const commonStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingTop: 20,
+  },
+  header: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+  },
+  stepBarContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+    paddingHorizontal: 20,
+  },
+  stepBar: {
+    flex: 1,
+    height: 8,
+    backgroundColor: '#ddd',
+    borderRadius: 4,
+    marginHorizontal: 2,
+  },
+  activeStepBar: {
+    backgroundColor: '#f3c09e', // Couleur active
+  },
+});
 
 export default function AddMealScreen() {
-  const [title, setTitle] = useState('');
-  const [hours, setHours] = useState('00');
-  const [minutes, setMinutes] = useState('00');
-  const [seconds, setSeconds] = useState('00');
-  const [servings, setServings] = useState('');
-  const [budget, setBudget] = useState('');
-  const [difficulty, setDifficulty] = useState();
-  const [category, setCategory] = useState();
-  const [tagInput, setTagInput] = useState('');
-  const [tags, setTags] = useState(['Easy', 'Beginner', '5min', 'FastFood']);
-  const [cookwareInput, setCookwareInput] = useState('');
-  const [cookwareQty, setCookwareQty] = useState('');
-  const [cookwareList, setCookwareList] = useState([
-    {name: 'Pot', quantity: 28},
-    {name: 'Spoon', quantity: 12},
-    {name: 'Knife', quantity: 1},
-  ]);
-  const [ingredientInput, setIngredientInput] = useState('');
-  const [ingredientQty, setIngredientQty] = useState('');
-  const [ingredientList, setIngredientList] = useState([
-    {name: 'Tomatoes', quantity: 28},
-    {name: 'Cheese', quantity: 12},
-    {name: 'Slice of Bread', quantity: 28},
-  ]);
-  const [stepDescription, setStepDescription] = useState('');
-  const [stepDuration, setStepDuration] = useState('');
-  const [steps, setSteps] = useState([
-    {description: 'First step to cook the meal', duration: 1},
-    {description: 'Second step to cook the meal', duration: 2},
-    {description: 'Third step to cook the meal', duration: 3},
-  ]);
+  const navigation = useNavigation();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [recipeData, setRecipeData] = useState({
+    id: null,
+    title: '', // Changé de 'titre'
+    imageUrl: '',
+    description: '', // Ajouté
+    ingredients: [],
+    instructions: [],
+    ustensils: [], // Changé de 'ustensiles'
+    servings: '', // Changé de 'portions'
+    preparationTimeMinutes: '', // Changé de 'tempsPreparationMinutes'
+    difficulty: 1, // Changé de 'difficulte'
+    tags: [],
+    category: 'Unspecified', // Changé de 'categorie'
+    userId: null,
+    rating: 0,
+  });
+  const [loading, setLoading] = useState(false);
 
-  const addTag = () => {
-    if (tagInput.trim() !== '') {
-      setTags([...tags, tagInput.trim()]);
-      setTagInput('');
+  const totalSteps = 5; // Total des étapes du formulaire
+
+  const handleNext = (data) => {
+    setRecipeData(prev => ({ ...prev, ...data }));
+    if (currentStep < totalSteps) {
+      setCurrentStep(prev => prev + 1);
+    } else {
+      // Dernière étape, soumettre la recette
+      handleSubmitRecipe();
     }
   };
 
-  const removeTag = index => {
-    const newTags = [...tags];
-    newTags.splice(index, 1);
-    setTags(newTags);
-  };
-
-  const addCookware = () => {
-    if (cookwareInput && cookwareQty) {
-      setCookwareList([
-        ...cookwareList,
-        {name: cookwareInput, quantity: cookwareQty},
-      ]);
-      setCookwareInput('');
-      setCookwareQty('');
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(prev => prev - 1);
+    } else {
+      navigation.goBack(); // Revenir à l'écran précédent si première étape
     }
   };
 
-  const removeCookware = index => {
-    const newList = [...cookwareList];
-    newList.splice(index, 1);
-    setCookwareList(newList);
-  };
+  const handleSubmitRecipe = async () => {
+    setLoading(true);
+    try {
+      const user = await AuthServices.getCurrentUser();
+      if (!user) {
+        Alert.alert('Erreur', 'Vous devez être connecté pour ajouter une recette.');
+        setLoading(false);
+        return;
+      }
 
-  const addIngredient = () => {
-    if (ingredientInput && ingredientQty) {
-      setIngredientList([
-        ...ingredientList,
-        {name: ingredientInput, quantity: ingredientQty},
-      ]);
-      setIngredientInput('');
-      setIngredientQty('');
+      // Créer une instance de Recette avec les données complétées
+      const newRecipe = new Recette(
+        null, // L'ID sera généré par Firestore
+        recipeData.title,
+        recipeData.imageUrl,
+        recipeData.description, // Passage de la description
+        recipeData.ingredients,
+        recipeData.instructions,
+        recipeData.ustensils,
+        parseInt(recipeData.servings, 10),
+        parseInt(recipeData.preparationTimeMinutes, 10),
+        parseInt(recipeData.difficulty, 10),
+        recipeData.tags,
+        recipeData.category,
+        user.uid, // Assigner l'UID de l'utilisateur courant
+        new Date(), // Date de création
+        recipeData.rating
+      );
+
+      await RecipeServices.createRecipe(newRecipe);
+      Alert.alert('Succès', 'Recette ajoutée avec succès !');
+      navigation.goBack(); // Ou naviguer vers les détails de la recette
+    } catch (error) {
+      Alert.alert('Erreur', 'Impossible d\'ajouter la recette : ' + error.message);
+      console.error('Erreur soumission recette:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const removeIngredient = index => {
-    const newList = [...ingredientList];
-    newList.splice(index, 1);
-    setIngredientList(newList);
-  };
-
-  const addStep = () => {
-    if (stepDescription && stepDuration) {
-      setSteps([
-        ...steps,
-        {description: stepDescription, duration: stepDuration},
-      ]);
-      setStepDescription('');
-      setStepDuration('');
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return <StepRecipeBasicInfo onNext={handleNext} initialData={recipeData} />;
+      case 2:
+        return <StepRecipeIngredients onNext={handleNext} onBack={handleBack} initialData={recipeData} />;
+      case 3:
+        return <StepRecipeUstensils onNext={handleNext} onBack={handleBack} initialData={recipeData} />;
+      case 4:
+        return <StepRecipeInstructions onNext={handleNext} onBack={handleBack} initialData={recipeData} />;
+      case 5:
+        return <StepRecipeTagsAndFinish onNext={handleNext} onBack={handleBack} initialData={recipeData} />;
+      default:
+        return null;
     }
-  };
-
-  const removeStep = index => {
-    const newList = [...steps];
-    newList.splice(index, 1);
-    setSteps(newList);
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>Add Meal</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Enter recipe title"
-        value={title}
-        onChangeText={setTitle}
-      />
-
-      <View style={styles.row}>
-        <TextInput
-          style={styles.timeInput}
-          value={hours}
-          onChangeText={setHours}
-        />
-        <TextInput
-          style={styles.timeInput}
-          value={minutes}
-          onChangeText={setMinutes}
-        />
-        <TextInput
-          style={styles.timeInput}
-          value={seconds}
-          onChangeText={setSeconds}
-        />
+    <View style={commonStyles.container}>
+      <View style={commonStyles.header}>
+        <Text style={commonStyles.title}>Ajouter une Recette</Text>
+        <Text style={commonStyles.subtitle}>{`Étape ${currentStep} sur ${totalSteps}`}</Text>
       </View>
-
-      <View style={styles.row}>
-        <TextInput
-          style={styles.input}
-          placeholder="Number of Servings"
-          value={servings}
-          onChangeText={setServings}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Enter Budget"
-          value={budget}
-          onChangeText={setBudget}
-        />
-      </View>
-
-      <Picker
-        selectedValue={difficulty}
-        onValueChange={setDifficulty}
-        style={styles.picker}>
-        <Picker.Item label="Select a difficulty" value={null} />
-        <Picker.Item label="Easy" value="easy" />
-        <Picker.Item label="Medium" value="medium" />
-        <Picker.Item label="Hard" value="hard" />
-      </Picker>
-
-      <Picker
-        selectedValue={category}
-        onValueChange={setCategory}
-        style={styles.picker}>
-        <Picker.Item label="Select a Category" value={null} />
-        <Picker.Item label="Main Course" value="main" />
-        <Picker.Item label="Dessert" value="dessert" />
-      </Picker>
-
-      <View style={styles.tagsContainer}>
-        {tags.map((tag, index) => (
-          <TouchableOpacity key={index} onPress={() => removeTag(index)}>
-            <Text style={styles.tag}>{tag} ✕</Text>
-          </TouchableOpacity>
+      <View style={commonStyles.stepBarContainer}>
+        {[...Array(totalSteps)].map((_, index) => (
+          <View
+            key={index}
+            style={[
+              commonStyles.stepBar,
+              index + 1 === currentStep && commonStyles.activeStepBar,
+            ]}
+          />
         ))}
       </View>
-      <View style={styles.row}>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter a new tag"
-          value={tagInput}
-          onChangeText={setTagInput}
-        />
-        <TouchableOpacity onPress={addTag} style={styles.addBtn}>
-          <Text>＋</Text>
-        </TouchableOpacity>
-      </View>
-
-      <Text style={styles.subheader}>Cookware</Text>
-      <View style={styles.row}>
-        <TextInput
-          style={styles.input}
-          placeholder="Select the cookware"
-          value={cookwareInput}
-          onChangeText={setCookwareInput}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Quantity"
-          value={cookwareQty}
-          onChangeText={setCookwareQty}
-          keyboardType="numeric"
-        />
-        <TouchableOpacity onPress={addCookware} style={styles.addBtn}>
-          <Text>＋</Text>
-        </TouchableOpacity>
-      </View>
-      {cookwareList.map((item, index) => (
-        <View key={index} style={styles.listItem}>
-          <Text>{item.name}</Text>
-          <Text>{item.quantity}</Text>
-          <TouchableOpacity onPress={() => removeCookware(index)}>
-            <Text>✕</Text>
-          </TouchableOpacity>
+      {loading ? (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="#f3c09e" />
+          <Text style={{ marginTop: 10 }}>Enregistrement de la recette...</Text>
         </View>
-      ))}
-
-      <Text style={styles.subheader}>Ingredients</Text>
-      <View style={styles.row}>
-        <TextInput
-          style={styles.input}
-          placeholder="Select an ingredient"
-          value={ingredientInput}
-          onChangeText={setIngredientInput}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Quantity"
-          value={ingredientQty}
-          onChangeText={setIngredientQty}
-          keyboardType="numeric"
-        />
-        <TouchableOpacity onPress={addIngredient} style={styles.addBtn}>
-          <Text>＋</Text>
-        </TouchableOpacity>
-      </View>
-      {ingredientList.map((item, index) => (
-        <View key={index} style={styles.listItem}>
-          <Text>{item.name}</Text>
-          <Text>{item.quantity} KG</Text>
-          <TouchableOpacity onPress={() => removeIngredient(index)}>
-            <Text>✕</Text>
-          </TouchableOpacity>
-        </View>
-      ))}
-
-      <Text style={styles.subheader}>Cooking Steps</Text>
-      <View style={styles.row}>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter Step Description"
-          value={stepDescription}
-          onChangeText={setStepDescription}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Duration"
-          value={stepDuration}
-          onChangeText={setStepDuration}
-          keyboardType="numeric"
-        />
-        <TouchableOpacity onPress={addStep} style={styles.addBtn}>
-          <Text>＋</Text>
-        </TouchableOpacity>
-      </View>
-      {steps.map((step, index) => (
-        <View key={index} style={styles.listItem}>
-          <Text>{step.description}</Text>
-          <Text>{step.duration} Min</Text>
-          <TouchableOpacity onPress={() => removeStep(index)}>
-            <Text>✕</Text>
-          </TouchableOpacity>
-        </View>
-      ))}
-
-      <View style={styles.buttonRow}>
-        <TouchableOpacity style={styles.cancelBtn}>
-          <Text style={[styles.btnText, {color: '#f1731a'}]}>Cancel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.finishBtn}>
-          <Text style={styles.btnText}>Finish</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      ) : (
+        renderStep()
+      )}
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  header: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#f1731a',
-    marginBottom: 20,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#f3c09e',
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 10,
-    flex: 1,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 10,
-    alignItems: 'center',
-  },
-  timeInput: {
-    borderWidth: 1,
-    borderColor: '#f3c09e',
-    borderRadius: 10,
-    padding: 10,
-    width: 60,
-    textAlign: 'center',
-  },
-  picker: {
-    borderWidth: 1,
-    borderColor: '#f3c09e',
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  tagsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 10,
-  },
-  tag: {
-    backgroundColor: '#f3c09e',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
-    marginRight: 5,
-    marginBottom: 5,
-  },
-  subheader: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginVertical: 10,
-  },
-  listItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#fef3eb',
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 5,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-  },
-  cancelBtn: {
-    backgroundColor: '#fef3eb',
-    padding: 15,
-    borderRadius: 10,
-    flex: 1,
-    marginRight: 10,
-  },
-  finishBtn: {
-    backgroundColor: '#f1731a',
-    padding: 15,
-    borderRadius: 10,
-    flex: 1,
-  },
-  btnText: {
-    textAlign: 'center',
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  addBtn: {
-    backgroundColor: '#f3c09e',
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-});

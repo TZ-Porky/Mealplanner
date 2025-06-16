@@ -1,45 +1,103 @@
-class Recette {
+import Ingredient from './Ingredient';
+import Utensil from './Ustensile'; // Renommé pour la cohérence
+
+class Recette { // Tu peux aussi renommer la classe en "Recipe"
   constructor(
-    nom,
+    id = null,
+    title,
     imageUrl,
-    ingredients = [], // Liste des ingrédients
-    instructions = [], // Liste des instructions
-    ustensiles = [], // Liste des ustensiles
-    nombreDePortions, //
-    dureeInitialeParPersonne, // Pour calculer le temps total de préparation
-    difficultéExecution, // Représenté par un nombre d'étoiles
-    tags = [], // Liste des tags
-    categorie, // Catégorie
+    description = '', // Ajouté comme dans les maquettes
+    ingredients = [],
+    instructions = [],
+    utensils = [],
+    servings,
+    preparationTimeMinutes, // Renommé
+    difficulty, // Renommé
+    tags = [],
+    category, // Renommé
+    userId = null,
+    dateCreation = new Date(),
+    rating = 0,
   ) {
-    this.nom = nom;
-    this.imageUrl = imageUrl; // Image du plat
+    this.id = id;
+    this.title = title;
+    this.imageUrl = imageUrl;
+    this.description = description; // Ajouté
     this.ingredients = ingredients;
     this.instructions = instructions;
-    this.ustensiles = ustensiles;
-    this.nombreDePortions = nombreDePortions;
-    this.dureeInitialeParPersonne = dureeInitialeParPersonne;
-    this.difficultéExecution = difficultéExecution;
+    this.utensils = utensils; // Renommé
+    this.servings = servings; // Renommé
+    this.preparationTimeMinutes = preparationTimeMinutes; // Renommé
+    this.difficulty = difficulty; // Renommé
     this.tags = tags;
-    this.categorie = categorie;
+    this.category = category; // Renommé
+    this.userId = userId;
+    this.dateCreation = dateCreation;
+    this.rating = rating;
   }
 
-  calculerCoutPreparation() {
-    // S'obtient à partir du nombre de portions, du prix total des ingrédients utilisées.
-    let coutTotalIngredients = 0;
+  calculateTotalCost() {
+    let totalCostIngredients = 0;
     this.ingredients.forEach(ing => {
-      coutTotalIngredients += ing.quantité * ing.prixUnitaire;
+      totalCostIngredients += ing.quantity * ing.unitCost;
     });
-    // Vous devrez peut-être ajuster le coût en fonction du nombre de portions si votre prix unitaire d'ingrédient est pour une portion spécifique.
-    // Ici, on suppose que 'ing.quantité' est la quantité totale pour 'nombreDePortions'.
-    return coutTotalIngredients;
+    // Ajoutez ici le coût des ustensiles si applicable, ou d'autres coûts fixes
+    return totalCostIngredients;
   }
 
-  calculerTempsTotalPreparation() {
-    // S'obtient à partir de la durée initiale du plat pour une personne et le nombre de portions
-    // Cette logique est une simplification, le temps de préparation n'est pas toujours linéaire avec le nombre de portions.
-    // Vous devrez affiner cette logique.
-    return this.dureeInitialeParPersonne * this.nombreDePortions;
+  // Méthode pour convertir l'instance de classe en un objet JavaScript pur pour Firestore
+  toPlainObject() {
+    return {
+      title: this.title,
+      imageUrl: this.imageUrl,
+      description: this.description, // Ajouté
+      ingredients: this.ingredients.map(ing => ing.toPlainObject()),
+      instructions: this.instructions,
+      utensils: this.utensils.map(ust => ust.toPlainObject()), // Renommé
+      servings: this.servings, // Renommé
+      preparationTimeMinutes: this.preparationTimeMinutes, // Renommé
+      difficulty: this.difficulty, // Renommé
+      tags: this.tags,
+      category: this.category, // Renommé
+      userId: this.userId,
+      dateCreation: this.dateCreation,
+      rating: this.rating,
+    };
+  }
+
+  // Méthode statique pour créer une instance de Recette à partir d'un objet Firestore
+  static fromFirestore(data, id) {
+    const ingredients = Array.isArray(data.ingredients)
+      ? data.ingredients.map(ing => Ingredient.fromFirestore(ing))
+      : [];
+    const utensils = Array.isArray(data.utensils) // Utilise 'utensils'
+      ? data.utensils.map(ust => Utensil.fromFirestore(ust))
+      : [];
+    const instructions = Array.isArray(data.instructions)
+      ? data.instructions
+      : [];
+    const tags = Array.isArray(data.tags)
+      ? data.tags
+      : [];
+
+    return new Recette(
+      id,
+      data.title,
+      data.imageUrl,
+      data.description || '',
+      ingredients,
+      instructions,
+      utensils,
+      data.servings,
+      data.preparationTimeMinutes,
+      data.difficulty,
+      tags,
+      data.category,
+      data.userId,
+      data.dateCreation ? data.dateCreation.toDate() : new Date(),
+      data.rating || 0
+    );
   }
 }
 
-export default Recette;
+export default Recette; // Ou export default Recipe;

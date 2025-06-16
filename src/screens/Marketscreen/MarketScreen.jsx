@@ -1,102 +1,79 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, Alert } from 'react-native'; // On garde FlatList, pas de ScrollView ici
+/* eslint-disable react-native/no-inline-styles */
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, Alert, ActivityIndicator } from 'react-native';
 import MarketHeader from '../../components/MarketHeader/MarketHeader';
 import SearchBar from '../../components/SearchBar/SearchBar';
 import FilterButtons from '../../components/FilterButtons/FilterButtons';
 import MealCard from '../../components/MealCard/MealCard';
-import AddMealButton from '../../components/AddMealButton/AddMealButton'; // On garde le composant du bouton
+import AddMealButton from '../../components/AddMealButton/AddMealButton';
 import styles from './MarketScreenStyles';
-import { GlobalStyles } from '../../styles/AppStyles'; // Vérifiez toujours ce chemin
+import { GlobalStyles } from '../../styles/AppStyles';
+import RecipeServices from '../../services/RecipeServices'; // Importe le service
 
-const DUMMY_MEALS = [
-  // ... (vos données DUMMY_MEALS restent inchangées)
-  {
-    id: 'meal1',
-    name: 'Welsh Rabbit (Homemade)',
-    image: require('../../../assets/images/meal-1.png'),
-    ingredientsDesc: 'Classic cheese toast',
-    time: '1 hour 30 Minutes',
-    price: '7,500 XCFA',
-    rating: 5,
-    tag: 'Easy',
-    servings: '6',
-  },
-  {
-    id: 'meal2',
-    name: 'Spicy Chicken Curry',
-    image: require('../../../assets/images/meal-1.png'),
-    ingredientsDesc: 'Chicken, Spices, Coconut Milk',
-    time: '45 Min',
-    price: '3,500 XCFA',
-    rating: 4.5,
-    tag: 'Medium',
-    servings: '4',
-  },
-  {
-    id: 'meal3',
-    name: 'Vegetarian Lasagna',
-    image: require('../../../assets/images/meal-1.png'),
-    ingredientsDesc: 'Pasta, Vegetables, Cheese',
-    time: '1 hour',
-    price: '4,000 XCFA',
-    rating: 4,
-    tag: 'Hard',
-    servings: '8',
-  },
-  {
-    id: 'meal4',
-    name: 'Salmon with Asparagus',
-    image: require('../../../assets/images/meal-1.png'),
-    ingredientsDesc: 'Salmon, Asparagus, Lemon',
-    time: '25 Min',
-    price: '5,000 XCFA',
-    rating: 5,
-    tag: 'Easy',
-    servings: '2',
-  },
-];
-
-const filters = ['ALL', '5 Stars', 'Easy', 'Recent'];
+// Retire DUMMY_MEALS car nous allons charger depuis Firestore
 
 const MarketScreen = ({ navigation }) => {
+  const [recipes, setRecipes] = useState([]);
+  const [filteredRecipes, setFilteredRecipes] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('ALL');
+  const [activeFilter, setActiveFilter] = useState('All');
+  const [loading, setLoading] = useState(true);
+
+  const filters = ['All', 'Sweet', 'Salty', 'Vegetarian', 'Vegan', 'Dessert', 'Breakfast']; // Exemples de filtres
+
+  useEffect(() => {
+    // Charger les recettes au montage du composant
+    const unsubscribe = RecipeServices.onRecipesChanged((fetchedRecipes) => {
+      setRecipes(fetchedRecipes);
+      setLoading(false);
+    }, null); // Passe null pour récupérer toutes les recettes, ou auth.currentUser.uid pour celles de l'utilisateur
+
+    // Nettoyage de l'écouteur lors du démontage du composant
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    // Appliquer les filtres et la recherche
+    let currentFiltered = recipes;
+
+    if (activeFilter !== 'All') {
+      currentFiltered = currentFiltered.filter(recipe => recipe.categorie === activeFilter);
+    }
+
+    if (searchQuery) {
+      const lowerCaseQuery = searchQuery.toLowerCase();
+      currentFiltered = currentFiltered.filter(
+        recipe =>
+          recipe.titre.toLowerCase().includes(lowerCaseQuery) ||
+          recipe.tags.some(tag => tag.toLowerCase().includes(lowerCaseQuery))
+      );
+    }
+    setFilteredRecipes(currentFiltered);
+  }, [recipes, activeFilter, searchQuery]);
 
   const handleSearch = () => {
-    Alert.alert('Search', `Searching for: ${searchQuery}`);
+    // La recherche est déjà appliquée via useEffect lorsque searchQuery change
+    console.log('Searching for:', searchQuery);
   };
 
-  const handleFilterSelect = filter => {
+  const handleFilterSelect = (filter) => {
     setActiveFilter(filter);
   };
 
-  const filteredMeals = DUMMY_MEALS.filter(meal => {
-    const matchesSearch =
-      meal.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      meal.ingredientsDesc.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesFilter =
-      activeFilter === 'ALL' ||
-      (activeFilter === '5 Stars' && meal.rating === 5) ||
-      (activeFilter === 'Easy' && meal.tag === 'Easy');
-
-    return matchesSearch && matchesFilter;
-  });
-
-  const handleMealPress = meal => {
-    navigation.navigate('RecipeDetail', { recipe: meal });
+  const handleMealPress = (meal) => {
+    // Naviguer vers un écran de détails de recette
+    navigation.navigate('RecipeDetail', { recipeId: meal.id });
   };
 
   const handleAddMeal = () => {
     navigation.navigate('AddMeal');
   };
 
-  // Composant d'en-tête de la liste pour la FlatList
+  // Composant d'en-tête pour la FlatList
   // eslint-disable-next-line react/no-unstable-nested-components
   const ListHeader = () => (
     <View>
       <MarketHeader
-        onMenuPress={() => navigation.openDrawer && navigation.openDrawer()}
         onNotificationsPress={() => Alert.alert('Notifications', 'Notifications pressed')}
         onCartPress={() => Alert.alert('Cart', 'Cart pressed')}
       />
@@ -129,17 +106,27 @@ const MarketScreen = ({ navigation }) => {
     </View>
   );
 
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#f3c09e" />
+        <Text style={{ marginTop: 10 }}>Chargement des recettes...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={GlobalStyles.container}>
       <FlatList
-        data={filteredMeals}
+        data={filteredRecipes}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
-          <MealCard meal={item} onPress={handleMealPress} />
+          <MealCard meal={item} onPress={() => handleMealPress(item)} />
         )}
-        ListHeaderComponent={ListHeader} // L'en-tête de la liste
-        ListFooterComponent={ListFooter} // Le pied de page de la liste (avec le bouton)
-        contentContainerStyle={styles.flatListContentContainer} // Gère l'espacement
+        ListHeaderComponent={ListHeader}
+        ListFooterComponent={ListFooter}
+        contentContainerStyle={styles.flatListContentContainer}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );
