@@ -3,7 +3,7 @@
 /*                        CONNEXION SCREEN                        */
 // ============================================================== //
 import React, {useState} from 'react';
-import {Text, View, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform} from 'react-native';
+import {Text, View, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, Alert} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 // -------------------------------------------------------------- //
@@ -12,7 +12,7 @@ import GoogleLogo from '../../../assets/icons/google.svg';
 import Button from '../../components/common/Button';
 import styles from './ConnexionScreenStyle';
 // -------------------------------------------------------------- //
-import { signInWithEmail } from '../../firebase/firebaseFunctions';
+import AuthServices from '../../services/AuthServices';
 // ============================================================== //
 
 const ConnexionScreen = () => {
@@ -28,9 +28,18 @@ const ConnexionScreen = () => {
   // ! Fonctions
 
   const handleSignIn = async () => {
-    const user = await signInWithEmail(email, password);
-    if (user) {
+    if (!email || !password) {
+      Alert.alert('Erreur', 'Veuillez entrer votre email et mot de passe.');
+      return;
+    }
+
+    try{
+      const user = await AuthServices.signIn(email, password);
+      console.log('Connexion réussie :', user);
+      Alert.alert('Succès', 'Connexion réussie');
       navigation.replace('Main', {screen: 'Home'});
+    } catch (error) {
+      Alert.alert('Erreur de connexion', error.message);
     }
   };
 

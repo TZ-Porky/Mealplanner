@@ -1,10 +1,13 @@
-import React from 'react';
+/* eslint-disable react-native/no-inline-styles */
+import React, {useState, useEffect} from 'react';
 import {
   ScrollView,
   View,
   Text,
   TextInput,
   TouchableOpacity,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 // Composantes
@@ -22,8 +25,10 @@ import tomatoIcon from '../../../assets/images/tomato.png';
 import breadIcon from '../../../assets/images/bread.png';
 import meatIcon from '../../../assets/images/meat.png';
 import cheeseIcon from '../../../assets/images/cheese.png';
+// Auth
+import AuthServices from '../../services/AuthServices';
 
-// Données d'exemple (elles viendraient d'une API en général)
+// Données d'exemple
 // ========================================================================================//
 const recommendedRecipes = [
   {
@@ -82,14 +87,49 @@ const plannedMeals = [
 // ========================================================================================//
 
 const HomeScreen = ({navigation}) => {
+
+  // eslint-disable-next-line no-unused-vars
+  const [currentUser, setCurrentUser] = useState(null); // Pour stocker l'utilisateur courant
+  const [loading, setLoading] = useState(true); // Pour gérer l'état de chargement
+
+  const [userName, setUserName] = useState('user');
+
+  useEffect(() => {
+    // Charger les infos actuelles de l'utilisateur pour pré-remplir le formulaire
+    const loadCurrentUserAndData = async () => {
+      setLoading(true);
+      const user = await AuthServices.getCurrentUser();
+      if (user) {
+        setCurrentUser(user);
+        // Pré-remplir les champs si les données existent déjà
+        setUserName(user.fullName || '');
+      } else {
+        // Rediriger si aucun utilisateur n'est connecté
+        Alert.alert('Erreur', 'Aucun utilisateur connecté.');
+        navigation.replace('SignIn'); // ou 'SignUp'
+      }
+      setLoading(false);
+    };
+    loadCurrentUserAndData();
+  }, [navigation]);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Chargement de la page d'acceuil...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <Header title="Home" /> {/* Utilisez le composant Header */}
+      <Header title="Home" />
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
         {/* Section de bienvenue */}
         <View style={styles.section}>
           <Text style={styles.greetingText}>Hi,
-            <Text style={styles.greetingTextHighlight}> user!</Text>
+            <Text style={styles.greetingTextHighlight}> {userName} </Text>
             </Text>
           <Text style={styles.questionText}>
             Are we cooking something today?

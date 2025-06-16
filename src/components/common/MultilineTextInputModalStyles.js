@@ -13,7 +13,7 @@ export default StyleSheet.create({
     borderRadius: Layout.borderRadius.medium,
     padding: Layout.spacing.medium,
     width: '90%',
-    maxHeight: '80%',
+    maxHeight: '100%',
   },
   modalHeader: {
     flexDirection: 'row',

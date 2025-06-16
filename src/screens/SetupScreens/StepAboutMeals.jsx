@@ -9,14 +9,17 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 // -------------------------------------------------------------- //
 import styles from './StepStyle';
 import Button from '../../components/common/Button';
 import SelectableOption from '../../components/common/SelectableOption';
+import AuthServices from '../../services/AuthServices';
 // ============================================================== //
 
 const InputWithIcon = ({icon, subtext = '', ...props}) => (
@@ -33,21 +36,95 @@ const StepAboutMeals = () => {
 
   const navigation = useNavigation();
 
-  const [selectedMealOption, setSelectedMealOption] = useState(true);
-  const [selectedMealFrequencyOption, setSelectedMealFrequencyOption] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null); // Pour stocker l'utilisateur courant
+  const [loading, setLoading] = useState(true); // Pour gérer l'état de chargement
+
+  const [selectedMealOption, setSelectedMealOption] = useState('No');
+  const [selectedMealFrequencyOption, setSelectedMealFrequencyOption] = useState('Sometimes');
 
   const [mealName, setMealName] = useState('');
   const [consumeDate, setConsumeDate] = useState('');
   const [portions, setPortions] = useState('');
   const [mealPrice, setMealPrice] = useState('');
 
-  const handleNavigation = () => {
-    navigation.navigate('SetupStep4');
+  useEffect(() => {
+    // Charger les infos actuelles de l'utilisateur pour pré-remplir le formulaire
+    const loadCurrentUserAndData = async () => {
+      setLoading(true);
+      const user = await AuthServices.getCurrentUser();
+      if (user) {
+        setCurrentUser(user);
+        // Pré-remplir les champs si les données existent déjà
+        if (user.repasFavoris) {
+          setSelectedMealOption(user.repasFavoris.avoirPlatFavoris ? 'Yes' : 'No');
+          if (user.repasFavoris.avoirPlatFavoris) {
+            setMealName(user.repasFavoris.nomPlat || '');
+            setSelectedMealFrequencyOption(user.repasFavoris.frequenceConsommation || 'Sometimes');
+            setConsumeDate(user.repasFavoris.dureePlat ? String(user.repasFavoris.dureePlat) : '');
+            setPortions(user.repasFavoris.portions ? String(user.repasFavoris.portions) : '');
+            setMealPrice(user.repasFavoris.prixPlat ? String(user.repasFavoris.prixPlat) : '');
+          }
+        }
+      } else {
+        // Rediriger si aucun utilisateur n'est connecté
+        Alert.alert('Erreur', 'Aucun utilisateur connecté.');
+        navigation.replace('SignIn'); // ou 'SignUp'
+      }
+      setLoading(false);
+    };
+    loadCurrentUserAndData();
+  }, [navigation]);
+
+
+  const handleNavigation = async () => {
+    if (!currentUser) {
+      Alert.alert('Erreur', 'Utilisateur non connecté.');
+      return;
+    }
+
+    if (selectedMealOption === 'Yes') {
+      // Valider que tous les champs requis sont remplis
+      if (!mealName || !consumeDate || !portions || !mealPrice) {
+        Alert.alert('Erreur', 'Veuillez remplir tous les champs concernant votre plat préféré.');
+        return;
+      }
+    }
+
+    setLoading(true);
+    try {
+      const updates = {
+        repasFavoris: {
+          avoirPlatFavoris: selectedMealOption === 'Yes',
+          nomPlat: selectedMealOption === 'Yes' ? mealName : null,
+          frequenceConsommation: selectedMealOption === 'Yes' ? selectedMealFrequencyOption : null,
+          dureePlat: selectedMealOption === 'Yes' ? parseInt(consumeDate || '0', 10) : null,
+          portions: selectedMealOption === 'Yes' ? parseInt(portions || '0', 10) : null,
+          prixPlat: selectedMealOption === 'Yes' ? parseFloat(mealPrice || '0') : null,
+        },
+      };
+
+      await AuthServices.updateUserInfo(currentUser.uid, updates);
+      console.log('Préférences de repas mises à jour avec succès :', updates);
+      navigation.navigate('SetupStep4'); // Navigue vers l'étape suivante (FinishUp)
+    } catch (error) {
+      Alert.alert('Erreur', 'Impossible de mettre à jour les préférences de repas: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleBackNavigation = () => {
     navigation.goBack();
   };
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Chargement des préférences de repas...</Text>
+      </View>
+    );
+  }
   // ------------------------------------------------------------------ //
 
   return (

@@ -1,154 +1,178 @@
-import { StyleSheet, Platform } from 'react-native';
-import { Colors, Fonts, Layout, GlobalStyles } from '../../styles/AppStyles'; // Assurez-vous que le chemin vers vos constantes est correct. Ici, j'utilise 'constants' comme chemin standard.
+// src/screens/AddMealScreenStyle.js
+import { StyleSheet } from 'react-native';
+import { Colors, Fonts, Layout } from '../../styles/AppStyles'; // Assurez-vous que ces constantes sont définies dans votre projet
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.blankBackground,
-  },
-  flatListContentContainer: { // Renommé pour correspondre à l'utilisation dans le ScrollView
-    flexGrow: 1,
-    paddingBottom: Layout.spacing.large, // Espace en bas pour les boutons
+    padding: Layout.spacing.medium,
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? Layout.spacing.xLarge : Layout.spacing.medium,
-    paddingBottom: Layout.spacing.medium,
-    backgroundColor: Colors.primaryOrange, // Correspond à l'image
+    backgroundColor: Colors.primaryOrange,
+    padding: Layout.spacing.medium,
+    paddingTop: Layout.spacing.large * 1.5, // Pour laisser de la place à la barre de statut
     borderBottomLeftRadius: Layout.borderRadius.large,
     borderBottomRightRadius: Layout.borderRadius.large,
-    marginBottom: Layout.spacing.medium,
-    alignItems: 'flex-start', // Aligner le titre "Add Meal" à gauche
-    justifyContent: 'center',
-    paddingHorizontal: Layout.spacing.medium, // Pour que le texte ne touche pas les bords
-  },
-  headerTopRow: { // Pour les boutons retour et ajouter image
     flexDirection: 'row',
-    justifyContent: 'flex-end', // Aligner le bouton d'image à droite
+    justifyContent: 'space-between',
     alignItems: 'center',
-    width: '100%',
-    // paddingHorizontal: Layout.spacing.medium, // Déjà dans le header
-    marginBottom: Layout.spacing.medium, // Espace sous la ligne des boutons
-  },
-  headerButton: {
-    padding: Layout.spacing.small,
-    // Note: Le bouton retour n'est pas visible dans AddMeal.png, mais nous le gardons pour la cohérence.
-    // L'image montre un bouton d'image à droite.
-  },
-  mealImagePreview: { // Style pour l'image de prévisualisation (si ajoutée)
-    width: '90%', // ou 'auto' si vous voulez qu'elle remplisse plus.
-    height: 150,
-    borderRadius: Layout.borderRadius.medium,
     marginBottom: Layout.spacing.medium,
-    resizeMode: 'cover',
-    alignSelf: 'center', // Centrer l'image si elle est affichée
   },
-  title: {
-    textAlign: 'left', // Aligné à gauche comme sur l'image
-    fontWeight: Fonts.weights.bold,
-    fontSize: Fonts.sizes.xxLarge,
-    color: Colors.textLight, // Texte clair sur fond orange
-    marginBottom: Layout.spacing.xSmall,
-  },
-  subtitle: { // Ce sous-titre n'est pas visible dans l'image, donc nous le stylisons de manière générique ou le retirons.
-    fontSize: Fonts.sizes.medium,
-    textAlign: 'left',
-    fontWeight: Fonts.weights.medium,
+  headerTitle: {
+    fontFamily: Fonts.primary,
+    fontSize: Fonts.sizes.h3,
     color: Colors.textLight,
-    // marginBottom: Layout.spacing.medium, // Déjà géré par paddingBottom du header
+    fontWeight: 'bold',
   },
-  body: {
-    flex: 1,
-    paddingVertical: Layout.spacing.medium,
-    paddingHorizontal: Layout.spacing.medium,
-    // Pas de justifyContent ou alignItems pour laisser les champs s'aligner naturellement
+  imagePlaceholder: {
+    width: 60,
+    height: 60,
+    borderRadius: Layout.borderRadius.small,
+    backgroundColor: Colors.secondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
-  field: {
-    marginBottom: Layout.spacing.medium, // Espace entre les champs
+  section: {
+    backgroundColor: Colors.background,
+    borderRadius: Layout.borderRadius.small,
+    padding: Layout.spacing.medium,
+    marginBottom: Layout.spacing.medium,
+    elevation: 2, // Ombre pour Android
+    shadowColor: Colors.shadow, // Ombre pour iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   label: {
-    fontSize: Fonts.sizes.medium,
-    fontWeight: Fonts.weights.bold,
-    color: Colors.textDark, // Couleur foncée pour le label
-    marginBottom: Layout.spacing.xSmall,
-    marginLeft: Layout.spacing.xSmall, // Aligner avec le padding de l'input
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.inputBackground, // Couleur de fond de l'input
-    borderRadius: Layout.borderRadius.small, // Rayon de bordure
-    paddingHorizontal: Layout.spacing.small,
-    height: 50, // Hauteur fixe pour l'input
-    borderColor: Colors.borderColor, // Couleur de la bordure
-    borderWidth: 1, // Bordure visible
-  },
-  icon: {
-    marginRight: Layout.spacing.small,
-    color: Colors.iconColor, // Couleur des icônes
-  },
-  input: {
-    flex: 1,
+    fontFamily: Fonts.primary,
     fontSize: Fonts.sizes.medium,
     color: Colors.textDark,
-    paddingVertical: 0,
+    marginBottom: Layout.spacing.small,
+    fontWeight: 'bold',
   },
-  // Style spécifique pour les champs "Add Ingredients", "Add Cookware", "Add Instructions"
-  actionFieldInputContainer: {
-    backgroundColor: Colors.panelBackground, // Fond légèrement différent ou blanc
+  input: {
+    fontFamily: Fonts.primary,
+    fontSize: Fonts.sizes.medium,
+    borderWidth: 1,
+    borderColor: Colors.border,
     borderRadius: Layout.borderRadius.small,
-    borderWidth: 0, // Pas de bordure pour ces champs spécifiques
-    height: 50,
-    justifyContent: 'space-between', // Espacer le texte et le bouton +
+    padding: Layout.spacing.small,
+    color: Colors.textDark,
+  },
+  timeInputContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Layout.spacing.medium,
+    justifyContent: 'space-between',
   },
-  actionFieldInput: {
-    flex: 1, // Le texte prend de l'espace
-    color: Colors.textMedium, // Texte en gris pour les placeholders
+  timeInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Layout.borderRadius.small,
+    padding: Layout.spacing.small,
+    textAlign: 'center',
+    marginHorizontal: Layout.spacing.tiny,
+    color: Colors.textDark,
+    fontSize: Fonts.sizes.medium,
   },
-  actionButton: {
-    padding: Layout.spacing.xSmall,
+  timeSeparator: {
+    fontSize: Fonts.sizes.large,
+    fontWeight: 'bold',
+    color: Colors.textDark,
   },
-  actionButtonIcon: {
-    color: Colors.primaryOrange, // Icône orange
+  rowInputs: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-
-  // buttonContainer pour les boutons du bas
+  unitText: {
+    fontFamily: Fonts.primary,
+    fontSize: Fonts.sizes.medium,
+    color: Colors.textGray,
+    marginLeft: Layout.spacing.small,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Layout.borderRadius.small,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    position: 'relative', // Pour positionner l'icône
+  },
+  picker: {
+    width: '100%',
+    color: Colors.textDark, // Couleur du texte par défaut
+  },
+  pickerItem: {
+    fontSize: Fonts.sizes.medium,
+    fontFamily: Fonts.primary,
+    color: Colors.textDark,
+  },
+  pickerIcon: {
+    position: 'absolute',
+    right: Layout.spacing.small,
+    top: '50%',
+    transform: [{ translateY: -10 }], // Centre verticalement
+    pointerEvents: 'none', // Pour que le Picker soit toujours cliquable
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: Layout.spacing.small,
+  },
+  tag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.primary,
+    borderRadius: Layout.borderRadius.small,
+    paddingVertical: Layout.spacing.tiny,
+    paddingHorizontal: Layout.spacing.small,
+    marginRight: Layout.spacing.small,
+    marginBottom: Layout.spacing.small,
+  },
+  tagText: {
+    color: Colors.textLight,
+    fontFamily: Fonts.primary,
+    fontSize: Fonts.sizes.small,
+    marginRight: Layout.spacing.tiny,
+  },
+  removeTagButton: {
+    padding: 2,
+  },
+  addTagInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  addTagButton: {
+    marginLeft: Layout.spacing.small,
+  },
+  listItemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Layout.spacing.small,
+    paddingRight: Layout.spacing.tiny,
+  },
+  inputContainer: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Layout.borderRadius.small,
+    justifyContent: 'center',
+    position: 'relative',
+    height: 48, // Hauteur fixe pour aligner avec les TextInput
+  },
+  addButton: {
+    marginLeft: Layout.spacing.small,
+  },
+  removeButton: {
+    marginRight: Layout.spacing.tiny,
+  },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around', // Espacer les deux boutons du bas
-    paddingHorizontal: Layout.spacing.medium,
-    paddingVertical: Layout.spacing.medium,
-    borderTopWidth: 0, // Pas de ligne de séparation visible dans l'image
-    backgroundColor: Colors.blankBackground,
-  },
-  // Styles spécifiques pour les boutons Cancel et Finish
-  cancelButton: {
-    flex: 1,
-    marginRight: Layout.spacing.small,
-    backgroundColor: Colors.buttonGray, // Couleur grise pour Cancel
-    borderRadius: Layout.borderRadius.large, // Rayon plus grand pour les boutons du bas
-    paddingVertical: Layout.spacing.medium,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    color: Colors.textDark, // Texte sombre pour Cancel
-    fontSize: Fonts.sizes.large,
-    fontWeight: Fonts.weights.bold,
-  },
-  finishButton: {
-    flex: 1,
-    backgroundColor: Colors.primaryOrange, // Couleur orange pour Finish
-    borderRadius: Layout.borderRadius.large, // Rayon plus grand pour les boutons du bas
-    paddingVertical: Layout.spacing.medium,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  finishButtonText: {
-    color: Colors.textLight, // Texte clair pour Finish
-    fontSize: Fonts.sizes.large,
-    fontWeight: Fonts.weights.bold,
+    justifyContent: 'space-between',
+    marginTop: Layout.spacing.medium,
+    marginBottom: Layout.spacing.large,
   },
 });
 

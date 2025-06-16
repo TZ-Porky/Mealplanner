@@ -22,6 +22,7 @@ import GoogleLogo from '../../../assets/icons/google.svg';
 import Button from '../../components/common/Button';
 // -------------------------------------------------------------- //
 import auth from '@react-native-firebase/auth';
+import AuthServices from '../../services/AuthServices';
 
 console.log('Firebase UID:', auth().currentUser?.uid);
 
@@ -33,6 +34,7 @@ const InscriptionScreen = () => {
 
   const navigation = useNavigation();
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -53,20 +55,18 @@ const InscriptionScreen = () => {
 
   const handleSignUp = async () => {
     if (password !== confirmPassword) {
-      Alert.alert('Passwords do not match');
+      Alert.alert('Erreur', 'Veuillez réesayer votre mot de passe.');
       return;
     }
-
     try {
-      const userCredential = await auth().createUserWithEmailAndPassword(
-        email,
-        password,
-      );
-      console.log('Inscription réussie :', userCredential.user);
-      navigation.replace('Setup', {screen: 'SetupStep1'});
+      // Appel de la nouvelle fonction signUp qui ne prend que email et password
+      const newUser = await AuthServices.signUp(email, password);
+      console.log('Inscription réussie (minimal) :', newUser);
+      Alert.alert('Succès', 'Votre compte a été créé avec succès.');
+      handleNavigationSetupForm();
     } catch (error) {
       console.error('Erreur inscription:', error);
-      Alert.alert('Erreur', error.message);
+      Alert.alert('Erreur d\'inscription', error.message);
     }
   };
 
@@ -139,14 +139,14 @@ const InscriptionScreen = () => {
               />
               <TextInput
                 placeholder="Re-enter Password"
-                secureTextEntry={!showPassword}
+                secureTextEntry={!showConfirmPassword}
                 style={styles.input}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
               />
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
                 <Ionicons
-                  name={showPassword ? 'eye-off' : 'eye'}
+                  name={showConfirmPassword ? 'eye-off' : 'eye'}
                   size={24}
                   color="#888"
                 />

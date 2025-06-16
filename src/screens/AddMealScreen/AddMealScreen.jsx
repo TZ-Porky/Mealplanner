@@ -1,262 +1,386 @@
 /* eslint-disable react-native/no-inline-styles */
+import React, {useState} from 'react';
 import {
   View,
   Text,
   TextInput,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Alert,
   TouchableOpacity,
-  Image,
-  Modal, // Importez Modal si vous en avez besoin pour d'autres usages dans cet écran
+  ScrollView,
+  StyleSheet,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import React, { useState } from 'react';
-// -------------------------------------------------------------- //
-import styles from './AddMealScreenStyles';
-// Import des nouveaux composants de modale
-import ListInputModal from '../../components/common/ListInputModal';
-import MultilineTextInputModal from '../../components/common/MutliLineInputModal';
-import { Fonts, Layout, Colors } from '../../styles/AppStyles'; // Assurez-vous que le chemin vers vos constantes est correct.
+import {Picker} from '@react-native-picker/picker';
 
-// Composant InputWithIcon légèrement adapté pour les champs avec le bouton '+'
-const InputWithIcon = ({ icon, multiline, numberOfLines, isActionField, onActionButtonPress, placeholder, value, onChangeText, ...props }) => (
-  <View style={[styles.inputContainer, multiline && styles.multilineInput, isActionField && styles.actionFieldInputContainer]}>
-    {icon && <Ionicons name={icon} size={24} color={Colors.iconColor} style={styles.icon} />}
-    <TextInput
-      style={[styles.input, multiline && styles.multilineInput, isActionField && styles.actionFieldInput]}
-      placeholder={placeholder}
-      value={value}
-      onChangeText={onChangeText}
-      editable={!isActionField} // Rendre non éditable si c'est un champ d'action (avec le +)
-      {...props}
-    />
-    {isActionField && (
-      <TouchableOpacity onPress={onActionButtonPress} style={styles.actionButton}>
-        <Ionicons name="add-circle" size={Fonts.sizes.xLarge} style={styles.actionButtonIcon} />
-      </TouchableOpacity>
-    )}
-  </View>
-);
+export default function AddMealScreen() {
+  const [title, setTitle] = useState('');
+  const [hours, setHours] = useState('00');
+  const [minutes, setMinutes] = useState('00');
+  const [seconds, setSeconds] = useState('00');
+  const [servings, setServings] = useState('');
+  const [budget, setBudget] = useState('');
+  const [difficulty, setDifficulty] = useState();
+  const [category, setCategory] = useState();
+  const [tagInput, setTagInput] = useState('');
+  const [tags, setTags] = useState(['Easy', 'Beginner', '5min', 'FastFood']);
+  const [cookwareInput, setCookwareInput] = useState('');
+  const [cookwareQty, setCookwareQty] = useState('');
+  const [cookwareList, setCookwareList] = useState([
+    {name: 'Pot', quantity: 28},
+    {name: 'Spoon', quantity: 12},
+    {name: 'Knife', quantity: 1},
+  ]);
+  const [ingredientInput, setIngredientInput] = useState('');
+  const [ingredientQty, setIngredientQty] = useState('');
+  const [ingredientList, setIngredientList] = useState([
+    {name: 'Tomatoes', quantity: 28},
+    {name: 'Cheese', quantity: 12},
+    {name: 'Slice of Bread', quantity: 28},
+  ]);
+  const [stepDescription, setStepDescription] = useState('');
+  const [stepDuration, setStepDuration] = useState('');
+  const [steps, setSteps] = useState([
+    {description: 'First step to cook the meal', duration: 1},
+    {description: 'Second step to cook the meal', duration: 2},
+    {description: 'Third step to cook the meal', duration: 3},
+  ]);
 
-const AddMealScreen = () => {
-  const navigation = useNavigation();
-
-  // États pour les champs du formulaire
-  const [mealName, setMealName] = useState('');
-  const [serving, setServing] = useState('');
-  const [time, setTime] = useState('');
-
-  // États pour les modales et leurs données
-  const [ingredients, setIngredients] = useState([]); // Tableau d'ingrédients
-  const [cookware, setCookware] = useState([]); // Tableau d'ustensiles
-  const [instructions, setInstructions] = useState(''); // Texte des instructions
-
-  // Visibilité des modales
-  const [isIngredientsModalVisible, setIsIngredientsModalVisible] = useState(false);
-  const [isCookwareModalVisible, setIsCookwareModalVisible] = useState(false);
-  const [isInstructionsModalVisible, setIsInstructionsModalVisible] = useState(false);
-
-  const [mealImage, setMealImage] = useState(null); // Pour l'URI de l'image sélectionnée
-
-  // --- Gestion de l'image ---
-  const handleChooseImage = () => {
-    Alert.alert(
-      'Add Image',
-      'Choose image source',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Camera',
-          onPress: () => {
-            // Implémentation réelle avec ImagePicker pour la caméra
-            Alert.alert('Camera', 'Camera functionality not fully implemented.');
-            setMealImage('https://via.placeholder.com/150/FF0000/FFFFFF?text=Meal+Image'); // Placeholder pour la démo
-          }
-        },
-        {
-          text: 'Gallery',
-          onPress: () => {
-            // Implémentation réelle avec ImagePicker pour la galerie
-            Alert.alert('Gallery', 'Gallery functionality not fully implemented.');
-            setMealImage('https://via.placeholder.com/150/0000FF/FFFFFF?text=Meal+Image'); // Placeholder pour la démo
-          }
-        },
-      ]
-    );
-  };
-
-  // --- Gestion de la soumission du formulaire ---
-  const handleFinish = () => {
-    // Validation minimale des champs
-    if (!mealName || !serving || !time || ingredients.length === 0 || cookware.length === 0 || !instructions) {
-      Alert.alert('Error', 'Please fill all required fields.');
-      return;
+  const addTag = () => {
+    if (tagInput.trim() !== '') {
+      setTags([...tags, tagInput.trim()]);
+      setTagInput('');
     }
-
-    // Préparer les données pour l'ajout
-    const newMealData = {
-      id: `new-meal-${Date.now()}`,
-      name: mealName,
-      serving: serving,
-      time: time,
-      ingredients: ingredients,
-      cookware: cookware,
-      instructions: instructions,
-      image: mealImage,
-    };
-
-    console.log('New Meal Data:', newMealData);
-    Alert.alert('Success', 'Meal added successfully! (Check console for data)');
-    // Ici, vous enverriez ces données à votre backend ou les ajouteriez à votre état global.
-    navigation.goBack(); // Revenir à l'écran précédent après ajout
   };
 
-  const handleCancel = () => {
-    navigation.goBack();
+  const removeTag = index => {
+    const newTags = [...tags];
+    newTags.splice(index, 1);
+    setTags(newTags);
+  };
+
+  const addCookware = () => {
+    if (cookwareInput && cookwareQty) {
+      setCookwareList([
+        ...cookwareList,
+        {name: cookwareInput, quantity: cookwareQty},
+      ]);
+      setCookwareInput('');
+      setCookwareQty('');
+    }
+  };
+
+  const removeCookware = index => {
+    const newList = [...cookwareList];
+    newList.splice(index, 1);
+    setCookwareList(newList);
+  };
+
+  const addIngredient = () => {
+    if (ingredientInput && ingredientQty) {
+      setIngredientList([
+        ...ingredientList,
+        {name: ingredientInput, quantity: ingredientQty},
+      ]);
+      setIngredientInput('');
+      setIngredientQty('');
+    }
+  };
+
+  const removeIngredient = index => {
+    const newList = [...ingredientList];
+    newList.splice(index, 1);
+    setIngredientList(newList);
+  };
+
+  const addStep = () => {
+    if (stepDescription && stepDuration) {
+      setSteps([
+        ...steps,
+        {description: stepDescription, duration: stepDuration},
+      ]);
+      setStepDescription('');
+      setStepDuration('');
+    }
+  };
+
+  const removeStep = index => {
+    const newList = [...steps];
+    newList.splice(index, 1);
+    setSteps(newList);
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.flatListContentContainer}
-        keyboardShouldPersistTaps="handled">
+    <ScrollView style={styles.container}>
+      <Text style={styles.header}>Add Meal</Text>
 
-        {/* ===================== | Header |======================= */}
-        <View style={styles.header}>
-          <View style={styles.headerTopRow}>
-            {/* Bouton de retour */}
-            <TouchableOpacity onPress={handleCancel} style={styles.headerButton}>
-              <Ionicons name="arrow-back" size={Fonts.sizes.xLarge} color={Colors.textLight} />
-            </TouchableOpacity>
-            {/* Bouton pour ajouter une image */}
-            <TouchableOpacity onPress={handleChooseImage} style={styles.headerButton}>
-              <Ionicons name="image" size={Fonts.sizes.xLarge} color={Colors.textLight} />
-            </TouchableOpacity>
-          </View>
+      <TextInput
+        style={styles.input}
+        placeholder="Enter recipe title"
+        value={title}
+        onChangeText={setTitle}
+      />
 
-          {mealImage && (
-            <Image source={{ uri: mealImage }} style={styles.mealImagePreview} />
-          )}
+      <View style={styles.row}>
+        <TextInput
+          style={styles.timeInput}
+          value={hours}
+          onChangeText={setHours}
+        />
+        <TextInput
+          style={styles.timeInput}
+          value={minutes}
+          onChangeText={setMinutes}
+        />
+        <TextInput
+          style={styles.timeInput}
+          value={seconds}
+          onChangeText={setSeconds}
+        />
+      </View>
 
-          <Text style={styles.title}>Add Meal</Text>
-        </View>
+      <View style={styles.row}>
+        <TextInput
+          style={styles.input}
+          placeholder="Number of Servings"
+          value={servings}
+          onChangeText={setServings}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Enter Budget"
+          value={budget}
+          onChangeText={setBudget}
+        />
+      </View>
 
-        {/* ===================== | Fields Forms |======================= */}
-        <View style={styles.body}>
-          {/* Nom du repas */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Name</Text>
-            <InputWithIcon
-              placeholder="Enter Name of Ingredient"
-              value={mealName}
-              onChangeText={setMealName}
-              keyboardType="default"
-            />
-          </View>
+      <Picker
+        selectedValue={difficulty}
+        onValueChange={setDifficulty}
+        style={styles.picker}>
+        <Picker.Item label="Select a difficulty" value={null} />
+        <Picker.Item label="Easy" value="easy" />
+        <Picker.Item label="Medium" value="medium" />
+        <Picker.Item label="Hard" value="hard" />
+      </Picker>
 
-          {/* Serving */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Serving</Text>
-            <InputWithIcon
-              placeholder="Enter Number of serving"
-              value={serving}
-              onChangeText={setServing}
-              keyboardType="numeric"
-            />
-          </View>
+      <Picker
+        selectedValue={category}
+        onValueChange={setCategory}
+        style={styles.picker}>
+        <Picker.Item label="Select a Category" value={null} />
+        <Picker.Item label="Main Course" value="main" />
+        <Picker.Item label="Dessert" value="dessert" />
+      </Picker>
 
-          {/* Time */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Time</Text>
-            <InputWithIcon
-              placeholder="Enter Time"
-              value={time}
-              onChangeText={setTime}
-              keyboardType="default"
-            />
-          </View>
-
-          {/* Add Ingredients */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Add Ingredients</Text>
-            <InputWithIcon
-              isActionField={true}
-              onActionButtonPress={() => setIsIngredientsModalVisible(true)}
-              placeholder={ingredients.length > 0 ? ingredients.join(', ') : 'Select Ingredients'}
-              value={ingredients.length > 0 ? ingredients.join(', ') : ''} // Afficher les ingrédients sélectionnés
-              editable={false}
-            />
-          </View>
-
-          {/* Add Cookware */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Add Cookware</Text>
-            <InputWithIcon
-              isActionField={true}
-              onActionButtonPress={() => setIsCookwareModalVisible(true)}
-              placeholder={cookware.length > 0 ? cookware.join(', ') : 'Add Cookware'}
-              value={cookware.length > 0 ? cookware.join(', ') : ''} // Afficher les ustensiles sélectionnés
-              editable={false}
-            />
-          </View>
-
-          {/* Add Instructions */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Add Instructions</Text>
-            <InputWithIcon
-              isActionField={true}
-              onActionButtonPress={() => setIsInstructionsModalVisible(true)}
-              placeholder={instructions ? instructions.substring(0, 50) + '...' : 'Add Instruction'} // Aperçu des instructions
-              value={instructions} // La valeur est le texte des instructions
-              editable={false}
-            />
-          </View>
-
-        </View>
-
-        {/* ===================== | Footer Buttons |======================= */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity onPress={handleCancel} style={styles.cancelButton}>
-            <Text style={styles.cancelButtonText}>Cancel</Text>
+      <View style={styles.tagsContainer}>
+        {tags.map((tag, index) => (
+          <TouchableOpacity key={index} onPress={() => removeTag(index)}>
+            <Text style={styles.tag}>{tag} ✕</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleFinish} style={styles.finishButton}>
-            <Text style={styles.finishButtonText}>Finish</Text>
+        ))}
+      </View>
+      <View style={styles.row}>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter a new tag"
+          value={tagInput}
+          onChangeText={setTagInput}
+        />
+        <TouchableOpacity onPress={addTag} style={styles.addBtn}>
+          <Text>＋</Text>
+        </TouchableOpacity>
+      </View>
+
+      <Text style={styles.subheader}>Cookware</Text>
+      <View style={styles.row}>
+        <TextInput
+          style={styles.input}
+          placeholder="Select the cookware"
+          value={cookwareInput}
+          onChangeText={setCookwareInput}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Quantity"
+          value={cookwareQty}
+          onChangeText={setCookwareQty}
+          keyboardType="numeric"
+        />
+        <TouchableOpacity onPress={addCookware} style={styles.addBtn}>
+          <Text>＋</Text>
+        </TouchableOpacity>
+      </View>
+      {cookwareList.map((item, index) => (
+        <View key={index} style={styles.listItem}>
+          <Text>{item.name}</Text>
+          <Text>{item.quantity}</Text>
+          <TouchableOpacity onPress={() => removeCookware(index)}>
+            <Text>✕</Text>
           </TouchableOpacity>
         </View>
+      ))}
 
-        {/* ===================== | Modals |======================= */}
-        <ListInputModal
-          visible={isIngredientsModalVisible}
-          onClose={() => setIsIngredientsModalVisible(false)}
-          title="Ingredients"
-          data={ingredients}
-          onSave={setIngredients}
+      <Text style={styles.subheader}>Ingredients</Text>
+      <View style={styles.row}>
+        <TextInput
+          style={styles.input}
+          placeholder="Select an ingredient"
+          value={ingredientInput}
+          onChangeText={setIngredientInput}
         />
-
-        <ListInputModal
-          visible={isCookwareModalVisible}
-          onClose={() => setIsCookwareModalVisible(false)}
-          title="Cookware"
-          data={cookware}
-          onSave={setCookware}
+        <TextInput
+          style={styles.input}
+          placeholder="Quantity"
+          value={ingredientQty}
+          onChangeText={setIngredientQty}
+          keyboardType="numeric"
         />
+        <TouchableOpacity onPress={addIngredient} style={styles.addBtn}>
+          <Text>＋</Text>
+        </TouchableOpacity>
+      </View>
+      {ingredientList.map((item, index) => (
+        <View key={index} style={styles.listItem}>
+          <Text>{item.name}</Text>
+          <Text>{item.quantity} KG</Text>
+          <TouchableOpacity onPress={() => removeIngredient(index)}>
+            <Text>✕</Text>
+          </TouchableOpacity>
+        </View>
+      ))}
 
-        <MultilineTextInputModal
-          visible={isInstructionsModalVisible}
-          onClose={() => setIsInstructionsModalVisible(false)}
-          title="Instructions"
-          initialValue={instructions}
-          onSave={setInstructions}
+      <Text style={styles.subheader}>Cooking Steps</Text>
+      <View style={styles.row}>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter Step Description"
+          value={stepDescription}
+          onChangeText={setStepDescription}
         />
+        <TextInput
+          style={styles.input}
+          placeholder="Duration"
+          value={stepDuration}
+          onChangeText={setStepDuration}
+          keyboardType="numeric"
+        />
+        <TouchableOpacity onPress={addStep} style={styles.addBtn}>
+          <Text>＋</Text>
+        </TouchableOpacity>
+      </View>
+      {steps.map((step, index) => (
+        <View key={index} style={styles.listItem}>
+          <Text>{step.description}</Text>
+          <Text>{step.duration} Min</Text>
+          <TouchableOpacity onPress={() => removeStep(index)}>
+            <Text>✕</Text>
+          </TouchableOpacity>
+        </View>
+      ))}
 
-      </ScrollView>
-    </KeyboardAvoidingView>
+      <View style={styles.buttonRow}>
+        <TouchableOpacity style={styles.cancelBtn}>
+          <Text style={[styles.btnText, {color: '#f1731a'}]}>Cancel</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.finishBtn}>
+          <Text style={styles.btnText}>Finish</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
-};
+}
 
-export default AddMealScreen;
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  header: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#f1731a',
+    marginBottom: 20,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#f3c09e',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
+    flex: 1,
+  },
+  row: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  timeInput: {
+    borderWidth: 1,
+    borderColor: '#f3c09e',
+    borderRadius: 10,
+    padding: 10,
+    width: 60,
+    textAlign: 'center',
+  },
+  picker: {
+    borderWidth: 1,
+    borderColor: '#f3c09e',
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 10,
+  },
+  tag: {
+    backgroundColor: '#f3c09e',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    marginRight: 5,
+    marginBottom: 5,
+  },
+  subheader: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginVertical: 10,
+  },
+  listItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fef3eb',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 5,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  cancelBtn: {
+    backgroundColor: '#fef3eb',
+    padding: 15,
+    borderRadius: 10,
+    flex: 1,
+    marginRight: 10,
+  },
+  finishBtn: {
+    backgroundColor: '#f1731a',
+    padding: 15,
+    borderRadius: 10,
+    flex: 1,
+  },
+  btnText: {
+    textAlign: 'center',
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  addBtn: {
+    backgroundColor: '#f3c09e',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+});

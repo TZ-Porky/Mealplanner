@@ -1,21 +1,17 @@
-// src/utils/firebaseFunctions.js
-
-// Importations directes des services Firebase spécifiques à React Native
-// C'est la méthode recommandée avec @react-native-firebase
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-// import storage from '@react-native-firebase/storage'; // <-- Retiré car non utilisé
 
-import { Alert, Platform } from 'react-native'; // Importe Alert et Platform de React Native
+import { Alert } from 'react-native';
 
 // Si vous comptez utiliser Google Sign-In, décommentez et installez la bibliothèque
 // import { GoogleSignin } from '@react-native-google-signin/google-signin';
+
 // Si vous comptez utiliser Facebook Login, décommentez et installez la bibliothèque
 // import { LoginManager, AccessToken } from 'react-native-fbsdk-next';
 
 
 // ===============================================
-// FONCTIONS D'AUTHENTIFICATION (avec @react-native-firebase/auth)
+// FONCTIONS D'AUTHENTIFICATION
 // ===============================================
 
 /**
@@ -24,6 +20,7 @@ import { Alert, Platform } from 'react-native'; // Importe Alert et Platform de 
  * @param {string} password - Le mot de passe de l'utilisateur.
  * @returns {Promise<Object|null>} L'objet utilisateur si succès, null si échec.
  */
+
 export const signUpWithEmail = async (email, password) => {
   try {
     const userCredential = await auth().createUserWithEmailAndPassword(email, password);
@@ -182,7 +179,7 @@ export const onAuthStateChanged = (callback) => {
 
 
 // ===============================================
-// FONCTIONS CLOUD FIRESTORE (CRUD de base avec @react-native-firebase/firestore)
+// FONCTIONS CLOUD FIRESTORE
 // ===============================================
 
 /**
