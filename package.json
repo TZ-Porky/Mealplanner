@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-community/geolocation": "^3.4.0",
     "@react-native-firebase/app": "^22.2.0",
     "@react-native-firebase/auth": "^22.2.0",
     "@react-native-firebase/firestore": "^22.2.0",
@@ -23,6 +24,7 @@
     "react": "19.0.0",
     "react-native": "0.79.2",
     "react-native-calendars": "^1.1312.0",
+    "react-native-maps": "^1.24.3",
     "react-native-safe-area-context": "^5.4.1",
     "react-native-screens": "^4.10.0",
     "react-native-svg": "^15.12.0",

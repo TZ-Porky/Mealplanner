@@ -1,4 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<!-- ...existing code... -->
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+<uses-permission android:name="android.permission.INTERNET" />
+<!-- ...existing code... -->
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -22,5 +28,10 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
+      <!-- ...existing code... -->
+    <meta-data
+      android:name="com.google.android.geo.API_KEY"
+      android:value="AIzaSyDqJtH6hpF1i1ct9qHzKsqHh4wzMwZTzfw"/>
+<!-- ...existing code... -->
     </application>
 </manifest>

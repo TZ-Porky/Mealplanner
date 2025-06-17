@@ -13,6 +13,9 @@ import MarketScreen from '../screens/Marketscreen/MarketScreen';
 // Placeholder components (à remplacer plus tard par les vrais)
 import {Colors} from '../styles/AppStyles';
 import styles from './MainTabNavigatorStyle';
+// ...existing code...
+import GeolocationScreen from '../screens/geolocalisation/GeolocationScreen';
+// ...existing code...
 // --------------------------------------------------------------------//
 
 const Tab = createBottomTabNavigator();
@@ -80,6 +83,9 @@ function CustomTabBar({state, descriptors, navigation}) {
           case 'Courses':
             iconName = isFocused ? 'receipt' : 'receipt-outline';
             break;
+             case 'Geolocalisation':
+             iconName = isFocused ? 'location' : 'location-outline';
+            break;
         }
 
         return (
@@ -120,6 +126,7 @@ function MainTabNavigator() {
       <Tab.Screen name="Planning" component={PlannerScreen} />
       <Tab.Screen name="Courses" component={CourseListScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Geolocalisation" component={GeolocationScreen} options={{ tabBarLabel: 'Géolocalisation' }} />
     </Tab.Navigator>
   );
 }
