@@ -1,20 +1,20 @@
 import Ingredient from './Ingredient';
-import Utensil from './Ustensile'; // Renommé pour la cohérence
+import Utensil from './Ustensile';
 
-class Recette { // Tu peux aussi renommer la classe en "Recipe"
+class Recette {
   constructor(
     id = null,
     title,
     imageUrl,
-    description = '', // Ajouté comme dans les maquettes
+    description = '',
     ingredients = [],
     instructions = [],
     utensils = [],
     servings,
-    preparationTimeMinutes, // Renommé
-    difficulty, // Renommé
+    preparationTimeMinutes,
+    difficulty,
     tags = [],
-    category, // Renommé
+    category,
     userId = null,
     dateCreation = new Date(),
     rating = 0,
@@ -22,15 +22,15 @@ class Recette { // Tu peux aussi renommer la classe en "Recipe"
     this.id = id;
     this.title = title;
     this.imageUrl = imageUrl;
-    this.description = description; // Ajouté
+    this.description = description;
     this.ingredients = ingredients;
     this.instructions = instructions;
-    this.utensils = utensils; // Renommé
-    this.servings = servings; // Renommé
-    this.preparationTimeMinutes = preparationTimeMinutes; // Renommé
-    this.difficulty = difficulty; // Renommé
+    this.utensils = utensils;
+    this.servings = servings;
+    this.preparationTimeMinutes = preparationTimeMinutes;
+    this.difficulty = difficulty;
     this.tags = tags;
-    this.category = category; // Renommé
+    this.category = category;
     this.userId = userId;
     this.dateCreation = dateCreation;
     this.rating = rating;
@@ -41,7 +41,6 @@ class Recette { // Tu peux aussi renommer la classe en "Recipe"
     this.ingredients.forEach(ing => {
       totalCostIngredients += ing.quantity * ing.unitCost;
     });
-    // Ajoutez ici le coût des ustensiles si applicable, ou d'autres coûts fixes
     return totalCostIngredients;
   }
 
@@ -50,15 +49,15 @@ class Recette { // Tu peux aussi renommer la classe en "Recipe"
     return {
       title: this.title,
       imageUrl: this.imageUrl,
-      description: this.description, // Ajouté
+      description: this.description,
       ingredients: this.ingredients.map(ing => ing.toPlainObject()),
       instructions: this.instructions,
-      utensils: this.utensils.map(ust => ust.toPlainObject()), // Renommé
-      servings: this.servings, // Renommé
-      preparationTimeMinutes: this.preparationTimeMinutes, // Renommé
-      difficulty: this.difficulty, // Renommé
+      utensils: this.utensils.map(ust => ust.toPlainObject()),
+      servings: this.servings,
+      preparationTimeMinutes: this.preparationTimeMinutes,
+      difficulty: this.difficulty,
       tags: this.tags,
-      category: this.category, // Renommé
+      category: this.category,
       userId: this.userId,
       dateCreation: this.dateCreation,
       rating: this.rating,
@@ -70,7 +69,7 @@ class Recette { // Tu peux aussi renommer la classe en "Recipe"
     const ingredients = Array.isArray(data.ingredients)
       ? data.ingredients.map(ing => Ingredient.fromFirestore(ing))
       : [];
-    const utensils = Array.isArray(data.utensils) // Utilise 'utensils'
+    const utensils = Array.isArray(data.utensils)
       ? data.utensils.map(ust => Utensil.fromFirestore(ust))
       : [];
     const instructions = Array.isArray(data.instructions)

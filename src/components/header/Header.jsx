@@ -27,7 +27,7 @@ const Header = ({ title = 'Home' }) => {
       <View style={styles.headerLeft}>
         <TouchableOpacity style={styles.menuButton}>
           {/* Remplacement de l'Image par Icon */}
-          <Icon name="menu" size={24} color={styles.pageTitle.color} /> {/* Utilisez une taille et couleur appropriées */}
+          <Icon name="menu" size={24} color={styles.pageTitle.color} />
         </TouchableOpacity>
         <Text style={styles.pageTitle}>{title}</Text>
       </View>

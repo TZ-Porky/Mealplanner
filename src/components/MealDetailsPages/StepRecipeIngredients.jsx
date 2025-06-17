@@ -9,9 +9,9 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
-import Button from '../../../components/common/Button';
+import Button from '../common/Button';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import Ingredient from '../../../models/Ingredient'; // Correct: Importe le modèle Ingredient
+import Ingredient from '../../models/Ingredient'; // Correct: Importe le modèle Ingredient
 
 const StepRecipeIngredients = ({onNext, onBack, initialData}) => {
   const [currentIngredientName, setCurrentIngredientName] = useState('');

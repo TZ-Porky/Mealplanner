@@ -4,7 +4,7 @@ import {Colors, Layout, Fonts} from '../../styles/AppStyles';
 export default StyleSheet.create({
   headerImageContainer: {
     width: Layout.window.width,
-    height: Layout.window.width * 0.7, // Ratio d'image, ajustez au besoin
+    height: Layout.window.width * 0.8, // Ratio d'image, ajustez au besoin
     position: 'relative',
   },
   headerImage: {
@@ -14,13 +14,20 @@ export default StyleSheet.create({
   },
   overlayButtons: {
     position: 'absolute',
-    top: Layout.spacing.large - 10, // Ajustez pour la barre de statut
+    top: Layout.spacing.large - 10,
     left: Layout.spacing.medium,
     right: Layout.spacing.medium,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    zIndex: 1, // Pour s'assurer qu'ils sont au-dessus de l'image
+    zIndex: 1,
+  },
+  overlayButtonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: Layout.spacing.small,
+    zIndex: 1,
   },
   iconButton: {
     backgroundColor: 'rgba(0,0,0,0.4)', // Fond semi-transparent

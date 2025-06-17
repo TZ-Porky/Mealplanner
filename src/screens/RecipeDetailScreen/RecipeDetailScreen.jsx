@@ -9,14 +9,16 @@ import IngredientsSection from '../../components/IngredientsSection/IngredientsS
 import InstructionsSection from '../../components/InstructionsSection/InstructionsSection';
 import styles from './RecipeDetailScreenStyles';
 import RecipeServices from '../../services/RecipeServices'; // Importez le service de recettes
+import AuthServices from '../../services/AuthServices'; // Importez le service d'authentification
 
 const RecipeDetailScreen = ({ route, navigation }) => {
   const { recipeId } = route.params;
   const [currentRecipeDetails, setCurrentRecipeDetails] = useState(null);
-  const [currentServings, setCurrentServings] = useState(1); // État pour les portions
+  const [currentServings, setCurrentServings] = useState(1);
   const [activeTab, setActiveTab] = useState('Cookware');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [canBeEdited, setCanBeEdited] = useState(true);
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -25,20 +27,33 @@ const RecipeDetailScreen = ({ route, navigation }) => {
         const recipe = await RecipeServices.getRecipeById(recipeId);
         if (recipe) {
           setCurrentRecipeDetails(recipe);
-          setCurrentServings(recipe.servings); // Initialise avec les portions de la recette
+          setCurrentServings(recipe.servings);
+          const currentUser = await AuthServices.getCurrentUser();
+          setCanBeEdited(currentUser?.uid && recipe.userId === currentUser.uid);
         } else {
           setError('Recette introuvable.');
         }
-      } catch (err) {
-        console.error('Erreur lors du chargement de la recette :', err);
-        setError('Impossible de charger la recette. Veuillez réessayer plus tard.');
+      } catch (errorFetchRecipe) {
+        console.error('Erreur lors de la récupération de la recette:', errorFetchRecipe);
+        Alert.alert('Erreur', 'Impossible de charger la recette.');
+        navigation.goBack();
       } finally {
         setLoading(false);
       }
+
     };
 
     fetchRecipe();
-  }, [recipeId]);
+
+    // Écoute des changements de recettes
+    const unsubscribe = RecipeServices.onRecipesChanged((updatedRecipes) => {
+      fetchRecipe();
+    });
+
+    // Nettoyage de l'écouteur lors du démontage du composant
+    return () => unsubscribe();
+
+  }, [navigation, recipeId]);
 
   const handleIncreaseServings = () => {
     if (currentRecipeDetails) {
@@ -65,10 +80,9 @@ const RecipeDetailScreen = ({ route, navigation }) => {
   const renderContent = () => {
     if (!currentRecipeDetails) {return null;}
 
-    // Calculs ajustés pour les propriétés du modèle Recette
     const adjustedCookware = currentRecipeDetails.utensils.map(item => ({
       ...item,
-      quantity: item.quantity, // Utilise la propriété 'quantite' du modèle Ustensile
+      quantity: item.quantity,
     }));
 
     const adjustedIngredients = currentRecipeDetails.ingredients.map(item => ({
@@ -118,26 +132,55 @@ const RecipeDetailScreen = ({ route, navigation }) => {
     );
   }
 
+  const handleEditRecipe = () => {
+    if (currentRecipeDetails && canBeEdited) {
+      navigation.navigate('EditMeal', { recipe: currentRecipeDetails });
+    }
+  };
+
+  const handleDeleteRecipe = () => {
+    Alert.alert(
+      'Confirmer la suppression',
+      'Êtes-vous sûr de vouloir supprimer cette recette ? Cette action est irréversible.',
+      [
+        { text: 'Annuler', style: 'cancel' },
+        { text: 'Supprimer', style: 'destructive', onPress: deleteRecipe },
+      ]
+    );
+  };
+
+  const deleteRecipe = async () => {
+    try{
+      RecipeServices.deleteRecipe(currentRecipeDetails.id);
+      navigation.goBack();
+      Alert.alert('Confirmation', 'Votre recette a été supprimée avec succès.');
+    } catch (deleteError) {
+      console.error('Erreur lors de la suppression de la recette :', deleteError);
+      Alert.alert('Erreur', 'Impossible de supprimer la recette. Veuillez réessayer plus tard.');
+    }
+  };
+
   // Calcul du temps et du coût pour l'affichage dans le header
   const timeInHours = Math.floor(currentRecipeDetails.preparationTimeMinutes / 60);
   const timeInMinutes = currentRecipeDetails.preparationTimeMinutes % 60;
   const formattedTime = (timeInHours > 0 ? `${timeInHours}h ` : '') + (timeInMinutes > 0 ? `${timeInMinutes}min` : '');
 
-  // Le prix doit être recalculé si les portions changent, en fonction du coût unitaire des ingrédients
-  // Le calcul de calculerCoutPreparation() est déjà dynamique dans le modèle Recette
+  // Calcul du prix total pour l'affichage dans le header
   const displayPrice = `${currentRecipeDetails.calculateTotalCost().toFixed(2)} XCFA`;
-
 
   return (
     <ScrollView style={styles.container}>
       <RecipeDetailHeader
-        image={currentRecipeDetails.imageUrl ? { uri: currentRecipeDetails.imageUrl } : require('../../../assets/images/meal-1.png')}
+        image={currentRecipeDetails.imageUrl}
         title={currentRecipeDetails.title}
         rating={currentRecipeDetails.rating}
         time={formattedTime}
         price={displayPrice}
         onGoBack={() => navigation.goBack()}
         onShare={() => console.log('Share Recipe')}
+        onDelete={handleDeleteRecipe}
+        onEdit={handleEditRecipe}
+        canBeEdited={canBeEdited}
         currentServings={currentServings}
         onServingsIncrease={handleIncreaseServings}
         onServingsDecrease={handleDecreaseServings}

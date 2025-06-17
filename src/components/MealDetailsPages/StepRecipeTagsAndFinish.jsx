@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView, Alert, StyleSheet, TouchableOpacity } from 'react-native';
-import Button from '../../../components/common/Button';
+import Button from '../common/Button';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const StepRecipeTagsAndFinish = ({ onNext, onBack, initialData }) => {
@@ -24,7 +24,7 @@ const StepRecipeTagsAndFinish = ({ onNext, onBack, initialData }) => {
   };
 
   const handleSubmit = () => {
-    onNext({ tags }); // onNext est configuré dans le parent pour appeler handleSubmitRecipe si c'est la dernière étape
+    onNext({ tags });
   };
 
   return (
@@ -36,7 +36,7 @@ const StepRecipeTagsAndFinish = ({ onNext, onBack, initialData }) => {
           placeholder="Ajouter un tag (ex: rapide, végétarien)"
           value={currentTag}
           onChangeText={setCurrentTag}
-          onSubmitEditing={handleAddTag} // Permet d'ajouter un tag en appuyant sur Entrée
+          onSubmitEditing={handleAddTag}
         />
         <Button title="Ajouter le tag" onPress={handleAddTag} />
 
@@ -52,7 +52,7 @@ const StepRecipeTagsAndFinish = ({ onNext, onBack, initialData }) => {
 
       <View style={stepStyles.buttonRow}>
         <Button title="Retour" onPress={onBack} outlined={true} style={{ flex: 1, marginRight: 10 }} />
-        <Button title="Terminer et Ajouter" onPress={handleSubmit} style={{ flex: 2 }} />
+        <Button title="Terminer" onPress={handleSubmit} style={{ flex: 2 }} />
       </View>
     </ScrollView>
   );

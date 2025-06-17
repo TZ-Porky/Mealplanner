@@ -12,11 +12,11 @@ import { useNavigation } from '@react-navigation/native';
 import RecipeServices from '../../services/RecipeServices'; // Importe le service de recette
 import Recette from '../../models/Recette'; // Importe le modèle Recette
 import AuthServices from '../../services/AuthServices'; // Pour obtenir l'UID de l'utilisateur
-import StepRecipeBasicInfo from './AddSteps/StepRecipeBasicInfo';
-import StepRecipeIngredients from './AddSteps/StepRecipeIngredients';
-import StepRecipeUstensils from './AddSteps/StepRecipeUstensils';
-import StepRecipeInstructions from './AddSteps/StepRecipeInstructions';
-import StepRecipeTagsAndFinish from './AddSteps/StepRecipeTagsAndFinish';
+import StepRecipeBasicInfo from '../../components/MealDetailsPages/StepRecipeBasicInfo';
+import StepRecipeIngredients from '../../components/MealDetailsPages/StepRecipeIngredients';
+import StepRecipeUstensils from '../../components/MealDetailsPages/StepRecipeUstensils';
+import StepRecipeInstructions from '../../components/MealDetailsPages/StepRecipeInstructions';
+import StepRecipeTagsAndFinish from '../../components/MealDetailsPages/StepRecipeTagsAndFinish';
 
 const commonStyles = StyleSheet.create({
   container: {
@@ -61,15 +61,15 @@ export default function AddMealScreen() {
   const [currentStep, setCurrentStep] = useState(1);
   const [recipeData, setRecipeData] = useState({
     id: null,
-    title: '', // Changé de 'titre'
+    title: '',
     imageUrl: '',
-    description: '', // Ajouté
+    description: '',
     ingredients: [],
     instructions: [],
-    ustensils: [], // Changé de 'ustensiles'
-    servings: '', // Changé de 'portions'
-    preparationTimeMinutes: '', // Changé de 'tempsPreparationMinutes'
-    difficulty: 1, // Changé de 'difficulte'
+    ustensils: [],
+    servings: '',
+    preparationTimeMinutes: '',
+    difficulty: 1,
     tags: [],
     category: 'Unspecified', // Changé de 'categorie'
     userId: null,

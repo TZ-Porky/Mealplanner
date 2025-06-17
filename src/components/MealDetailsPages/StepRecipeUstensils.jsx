@@ -9,15 +9,14 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
-import Button from '../../../components/common/Button';
+import Button from '../common/Button';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import Ustensile from '../../../models/Ustensile'; // Importe le modèle Ustensile
+import Ustensile from '../../models/Ustensile';
 
 const StepRecipeUstensils = ({onNext, onBack, initialData}) => {
   const [currentUstensilName, setCurrentUstensilName] = useState('');
   const [currentUstensilQty, setCurrentUstensilQty] = useState('');
-  // Utilise initialData.ustensils qui contient déjà les objets Ustensile
-  const [ustensils, setUstensils] = useState(initialData.ustensils || []); // Renommé
+  const [ustensils, setUstensils] = useState(initialData.ustensils || []);
 
   const handleAddUstensil = () => {
     if (!currentUstensilName || !currentUstensilQty) {
@@ -57,7 +56,7 @@ const StepRecipeUstensils = ({onNext, onBack, initialData}) => {
   };
 
   return (
-    <ScrollView style={stepStyles.scrollView} keyboardShouldPersistTaps="handled"> {/* Ajout ici si ce n'est pas déjà fait */}
+    <ScrollView style={stepStyles.scrollView} keyboardShouldPersistTaps="handled">
       <View style={stepStyles.section}>
         <Text style={stepStyles.sectionTitle}>Ustensiles nécessaires</Text>
 

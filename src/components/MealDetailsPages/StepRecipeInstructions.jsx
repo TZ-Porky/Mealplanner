@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView, Alert, StyleSheet, TouchableOpacity } from 'react-native';
-import Button from '../../../components/common/Button';
+import Button from '../common/Button';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const StepRecipeInstructions = ({ onNext, onBack, initialData }) => {

@@ -7,13 +7,15 @@ import {
   ScrollView,
   Alert,
   StyleSheet,
-  // Add KeyboardAvoidingView and Platform for consistency if needed
   KeyboardAvoidingView,
   Platform,
+  Image,
+  TouchableOpacity,
 } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
-import Button from '../../../components/common/Button'; // Assure-toi que le chemin est correct
-import Ionicons from 'react-native-vector-icons/Ionicons'; // Pour les icônes
+import Button from '../common/Button';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import {launchImageLibrary} from 'react-native-image-picker';
 
 const InputWithIcon = ({icon, label, ...props}) => (
   <View style={stepStyles.inputGroup}>
@@ -36,9 +38,35 @@ const StepRecipeBasicInfo = ({onNext, initialData}) => {
   );
   const [servings, setServings] = useState(
     initialData.servings ? String(initialData.servings) : '',
-  ); // Changed from 'portions' to 'servings'
-  const [difficulty, setDifficulty] = useState(initialData.difficulty || 1); // Renamed from 'difficulte' to 'difficulty'
-  const [category, setCategory] = useState(initialData.category || 'Non spécifiée'); // Renamed from 'categorie' to 'category'
+  );
+  const [difficulty, setDifficulty] = useState(initialData.difficulty || 1);
+  const [category, setCategory] = useState(initialData.category || 'Non spécifiée');
+
+  const handleChoosePhoto = () => {
+    const options = {
+      mediaType: 'photo',
+      quality: 0.7,
+      includeBase64: true,
+      maxHeight: 200,
+      maxWidth: 200,
+    };
+
+    launchImageLibrary(options, response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.errorCode) {
+        console.log('ImagePicker Error: ', response.errorCode);
+        Alert.alert(
+          'Erreur Image',
+          "Une erreur est survenue lors de la sélection de l'image.",
+        );
+      } else if (response.assets && response.assets.length > 0) {
+        const source = response.assets[0];
+        console.log('Image selected URI:', source.uri);
+        setImageUrl(`data:${source.type};base64,${source.base64}`);
+      }
+    });
+  };
 
   const handleNextStep = () => {
     // Trim whitespace from string inputs
@@ -105,15 +133,25 @@ const StepRecipeBasicInfo = ({onNext, initialData}) => {
             value={title}
             onChangeText={setTitle}
           />
-          <InputWithIcon
-            icon="image"
-            label="URL de l'image (optionnel)"
-            placeholder="Ex: https://example.com/image.jpg"
-            value={imageUrl}
-            onChangeText={setImageUrl}
-            keyboardType="url"
-            autoCapitalize="none"
-          />
+          <View style={stepStyles.inputGroup}>
+            <Text style={stepStyles.label}>Image de la recette</Text>
+            <TouchableOpacity
+              onPress={handleChoosePhoto}
+              style={stepStyles.imagePickerButton}>
+              {imageUrl ? (
+                <Image source={{uri: imageUrl}} style={stepStyles.imagePreview} />
+              ) : (
+                <Ionicons name="camera-outline" size={30} color="#888" />
+              )}
+              {imageUrl ? (
+                <Text style={stepStyles.imagePickerButtonText} />
+              ) : (
+                <Text style={stepStyles.imagePickerButtonText}>
+                  Appuyez pour choisir une image
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
           <InputWithIcon
             icon="document-text"
             label="Description de la Recette"
@@ -141,8 +179,8 @@ const StepRecipeBasicInfo = ({onNext, initialData}) => {
                 icon="people"
                 label="Nombre de Portions"
                 placeholder="Ex: 4"
-                value={servings} // Changed from 'portions' to 'servings'
-                onChangeText={setServings} // Changed from 'setPortions' to 'setServings'
+                value={servings}
+                onChangeText={setServings}
                 keyboardType="number-pad"
               />
             </View>
@@ -239,9 +277,32 @@ const stepStyles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#f9f9f9',
   },
+  imagePickerButton: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f9f9f9',
+    height: 150,
+    overflow: 'hidden',
+  },
+  imagePickerButtonText: {
+    marginTop: 10,
+    color: '#666',
+  },
+  imagePreview: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
+    resizeMode: 'cover',
+  },
   nextButton: {
-    marginBottom: 20, // Add some bottom margin to the button
+    marginTop: 20,
+    marginBottom: 20,
   },
 });
+
 
 export default StepRecipeBasicInfo;

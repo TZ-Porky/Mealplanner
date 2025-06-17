@@ -17,7 +17,7 @@ class RecipeServices {
       recette.dateCreation = new Date(); // Assurer une date de création actuelle
 
       const docRef = await this.recipesCollection.add(recette.toPlainObject());
-      recette.id = docRef.id; // Met à jour l'ID de l'objet recette
+      recette.id = docRef.id;
       return recette;
     } catch (error) {
       console.error('Erreur lors de la création de la recette :', error);
