@@ -11,6 +11,7 @@ import InscriptionScreen from './src/screens/Authentificationscreen/InscriptionS
 import RecipeDetailScreen from './src/screens/RecipeDetailScreen/RecipeDetailScreen';
 import AddMealScreen from './src/screens/AddMealScreen/AddMealScreen';
 import SetupNavigator from './src/navigation/SetupNavigator';
+import ChatAIScreen from './src/screens/ChatAIScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +26,8 @@ function RootStack() {
       <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
       <Stack.Screen name="Setup" component={SetupNavigator} />
       <Stack.Screen name="Main" component={MainTabNavigator} />
+      <Stack.Screen name="ChatAI" component={ChatAIScreen} />
+
     </Stack.Navigator>
   );
 }

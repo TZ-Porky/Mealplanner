@@ -5,7 +5,8 @@ import {View, Text, TouchableOpacity} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 // --------------------------------------------------------------------//
-
+import ChatAIScreen from '../screens/ChatAIScreen';
+import FloatingAIButton from '../components/FloatingAIButton';
 import HomeScreen from '../screens/Homescreen/HomeScreen';
 import PlannerScreen from '../screens/Planningscreen/PlanningScreen';
 import StocksScreen from '../screens/Stockscreen/StockScreen';
@@ -13,6 +14,7 @@ import MarketScreen from '../screens/Marketscreen/MarketScreen';
 // Placeholder components (à remplacer plus tard par les vrais)
 import {Colors} from '../styles/AppStyles';
 import styles from './MainTabNavigatorStyle';
+
 // --------------------------------------------------------------------//
 
 const Tab = createBottomTabNavigator();
@@ -111,6 +113,7 @@ function CustomTabBar({state, descriptors, navigation}) {
 // --------------------------------------------------------------------//
 function MainTabNavigator() {
   return (
+      <View style={{ flex: 1}}>
     <Tab.Navigator
       screenOptions={{headerShown: false}}
       tabBar={props => <CustomTabBar {...props} />}>
@@ -121,6 +124,8 @@ function MainTabNavigator() {
       <Tab.Screen name="Courses" component={CourseListScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
+    <FloatingAIButton/>
+    </View>
   );
 }
 

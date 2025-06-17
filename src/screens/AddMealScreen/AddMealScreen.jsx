@@ -1,4 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
+import React, { useState } from 'react';
+
 import {
   View,
   Text,
@@ -13,7 +15,8 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import React, { useState } from 'react';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 // -------------------------------------------------------------- //
 import styles from './AddMealScreenStyles';
 // Import des nouveaux composants de modale
@@ -88,32 +91,39 @@ const AddMealScreen = () => {
     );
   };
 
-  // --- Gestion de la soumission du formulaire ---
-  const handleFinish = () => {
-    // Validation minimale des champs
+  const handleFinish = async () => {
+    // Validation
     if (!mealName || !serving || !time || ingredients.length === 0 || cookware.length === 0 || !instructions) {
-      Alert.alert('Error', 'Please fill all required fields.');
-      return;
+      return Alert.alert('Error', 'Please fill all required fields.');
     }
 
-    // Préparer les données pour l'ajout
+    // Préparation des données
+    const user = auth().currentUser;
     const newMealData = {
-      id: `new-meal-${Date.now()}`,
-      name: mealName,
-      serving: serving,
-      time: time,
-      ingredients: ingredients,
-      cookware: cookware,
-      instructions: instructions,
-      image: mealImage,
+      name: mealName.trim(),
+      servings: parseInt(serving, 10),
+      time: time.trim(),
+      ingredients,
+      cookware,
+      instructions,
+      image: mealImage,           // URI string ou null
+      creatorUid: user?.uid || null,
+      createdAt: firestore.FieldValue.serverTimestamp(),
     };
 
-    console.log('New Meal Data:', newMealData);
-    Alert.alert('Success', 'Meal added successfully! (Check console for data)');
-    // Ici, vous enverriez ces données à votre backend ou les ajouteriez à votre état global.
-    navigation.goBack(); // Revenir à l'écran précédent après ajout
-  };
+    try {
+      // Enregistrement dans Firestore
+      await firestore()
+        .collection('recipes')
+        .add(newMealData);
 
+      Alert.alert('Success', 'Meal added successfully!');
+      navigation.goBack();
+    } catch (err) {
+      console.error('Firestore error:', err);
+      Alert.alert('Error', "Impossible d'ajouter le plat. Réessaie plus tard.");
+    }
+  };
   const handleCancel = () => {
     navigation.goBack();
   };

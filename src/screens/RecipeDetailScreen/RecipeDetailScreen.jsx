@@ -1,24 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Alert } from 'react-native';
+import { ScrollView, View, Alert, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
 import RecipeDetailHeader from '../../components/RecipeDetailHeader/RecipeDetailHeader';
-import GenerateShoppingListButton from '../../components/GenerateShoppingListButton/GenerateShoppingListButton'; // Renamed from GeneralShoppingListButton
+import GenerateShoppingListButton from '../../components/GenerateShoppingListButton/GenerateShoppingListButton';
 import TabButton from '../../components/TabButton/TabButton';
 import CookwareSection from '../../components/CookwareSection/CookwareSection';
 import IngredientsSection from '../../components/IngredientsSection/IngredientsSection';
 import InstructionsSection from '../../components/InstructionsSection/InstructionsSection';
 import styles from './RecipeDetailScreenStyles';
+import axios from 'axios'; // Pour l'IA
 
-// --- IMPORTANT: Redéfinition des données de la recette avec des quantités numériques ---
-// Cette `baseRecipeData` devrait être votre source de vérité pour une recette complète,
-// que vous récupéreriez normalement d'une API en utilisant `recipe.id` de `route.params`.
-// Pour l'exemple, nous la définissons ici.
 const detailedRecipeData = {
   id: 'welsh-rabbit',
-  image: require('../../../assets/images/meal-1.png'), // Change if your actual image path is different
+  image: require('../../../assets/images/meal-1.png'),
   title: 'Welsh Rabbit (Homemade)',
   rating: 5,
   time: '1 hour 30 Minutes',
-  servings: 6, // Numérique pour les calculs de parts
+  servings: 6,
   price: '7,500 XCFA',
   cookware: [
     { id: 'cw1', name: 'Saucepan', quantity: 1, price: 3000 },
@@ -27,7 +24,6 @@ const detailedRecipeData = {
     { id: 'cw4', name: 'Spoon', quantity: 2, price: 300 },
     { id: 'cw5', name: 'Plate', quantity: 2, price: 500 },
   ],
-  // Définissez les ingrédients avec des quantités numériques et des unités pour le calcul
   baseIngredients: [
     { id: 'ing1', name: 'Ingredient Name 1', quantity: 0.5, unit: 'cup' },
     { id: 'ing2', name: 'Ingredient Name 2', quantity: 1.0, unit: 'tablespoon' },
@@ -36,113 +32,123 @@ const detailedRecipeData = {
     { id: 'ing5', name: 'Ingredient Name 5', quantity: 0.25, unit: 'cup' },
     { id: 'ing6', name: 'Ingredient Name 6', quantity: 50, unit: 'ml' },
   ],
-  estimatedIngredientsTotal: 7500, // Total affiché sur l'image pour les ingrédients
+  estimatedIngredientsTotal: 7500,
   instructions: [
-    { id: 'ins1', stepNumber: 1, time: '15 Minutes', description: 'Boil chicken until it falls apart, then shred. Mix 1/2 cup of sauce and a little cheese with chicken.' },
-    { id: 'ins2', stepNumber: 2, time: '30 Minutes', description: 'Put other 1/2 can on bottom of 11x9 baking dish. Microwave tortillas until soft.' },
-    { id: 'ins3', stepNumber: 3, time: '1h15 Minutes', description: 'Put other 1/2 can on bottom of 11x9 baking dish. Microwave tortillas until soft.' },
+    { id: 'ins1', stepNumber: 1, time: '15 Minutes', description: 'Boil chicken until it falls apart, then shred.' },
+    { id: 'ins2', stepNumber: 2, time: '30 Minutes', description: 'Put 1/2 can on bottom of 11x9 baking dish.' },
+    { id: 'ins3', stepNumber: 3, time: '1h15 Minutes', description: 'Microwave tortillas until soft.' },
   ],
 };
 
-// SIMULATION DE STOCK (pour le bouton de liste de courses)
-// Les unités doivent correspondre aux unités des ingrédients
 const mockStock = {
-    'Ingredient Name 1': 0.2, // en cups
-    'Ingredient Name 2': 0.5, // en tablespoons
-    'Ingredient Name 3': 100, // en g
-    'Ingredient Name 4': 1,   // en pieces
-    'Ingredient Name 5': 0.0, // en cups
-    'Ingredient Name 6': 20,  // en ml
+  'Ingredient Name 1': 0.2,
+  'Ingredient Name 2': 0.5,
+  'Ingredient Name 3': 100,
+  'Ingredient Name 4': 1,
+  'Ingredient Name 5': 0.0,
+  'Ingredient Name 6': 20,
 };
 
 const RecipeDetailScreen = ({ navigation, route }) => {
-  // Utilisez les données passées par la navigation comme base,
-  // et combinez-les avec les détails complets (cookware, baseIngredients, instructions)
-  // qui seraient normalement récupérés via un ID
-  const { recipe } = route.params; // `recipe` contient id, image, name, rating, time, price, tags
+  const { recipe } = route.params;
 
-  // L'ID de la recette est utilisé pour "charger" les détails complets (ici, en les sélectionnant depuis `detailedRecipeData`)
-  // Dans une vraie app, ce serait un appel API : `fetchRecipeDetails(recipe.id)`
-  const currentRecipeDetails = detailedRecipeData.id === recipe.id ? detailedRecipeData : { ...recipe, // Fallback ou charger d'autres données
-    cookware: [], ingredients: [], instructions: [], servings: parseInt(recipe.servings || '1', 10),
-    baseIngredients: [], estimatedIngredientsTotal: 0
+  const currentRecipeDetails = detailedRecipeData.id === recipe.id ? detailedRecipeData : {
+    ...recipe,
+    cookware: [], ingredients: [], instructions: [],
+    servings: parseInt(recipe.servings || '1', 10),
+    baseIngredients: [], estimatedIngredientsTotal: 0,
   };
 
-  // Initialisez les parts avec la valeur passée ou la valeur par défaut du détaillé
   const initialServings = parseInt(recipe.servings, 10) || detailedRecipeData.servings;
   const [currentServings, setCurrentServings] = useState(initialServings);
   const [scaledIngredients, setScaledIngredients] = useState([]);
   const [activeTab, setActiveTab] = useState('Cookware');
 
-  // Fonction pour mettre à l'échelle les ingrédients
+  const [iaResponse, setIaResponse] = useState('');
+  const [loadingIA, setLoadingIA] = useState(false);
+
   const scaleIngredients = (servings) => {
-    // Utilisez les `baseIngredients` de `detailedRecipeData`
     const scaleFactor = servings / currentRecipeDetails.servings;
     return currentRecipeDetails.baseIngredients.map(ing => {
-      // Pour l'affichage, on peut arrondir ou formater
       const scaledQuantity = ing.quantity * scaleFactor;
       return {
         ...ing,
-        quantity: scaledQuantity, // Garder le nombre pour le calcul du shopping list
-        displayQuantity: scaledQuantity.toFixed(1), // Pour l'affichage
+        quantity: scaledQuantity,
+        displayQuantity: scaledQuantity.toFixed(1),
       };
     });
   };
 
   useEffect(() => {
-    // Mettre à jour les ingrédients mis à l'échelle lorsque les parts changent
     setScaledIngredients(scaleIngredients(currentServings));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentServings, currentRecipeDetails.id]); // Se déclenche quand currentServings change
+  }, [currentServings, currentRecipeDetails.id]);
 
-  // Initialiser les ingrédients lors du premier rendu de l'écran
   useEffect(() => {
     setScaledIngredients(scaleIngredients(initialServings));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialServings, currentRecipeDetails.id]);  // Se déclenche une seule fois au montage du composant
+  }, [initialServings, currentRecipeDetails.id]);
 
+  const handleIncreaseServings = () => setCurrentServings(prev => prev + 1);
+  const handleDecreaseServings = () => setCurrentServings(prev => Math.max(1, prev - 1));
 
-  const handleIncreaseServings = () => {
-    setCurrentServings(prevServings => prevServings + 1);
-  };
+ const handleGenerateShoppingList = () => {
+   let shoppingListItems = [];
 
-  const handleDecreaseServings = () => {
-    setCurrentServings(prevServings => Math.max(1, prevServings - 1)); // Minimum 1 part
-  };
+   scaledIngredients.forEach((ingredient) => {
+     const required = ingredient.quantity;
+     const inStock = mockStock[ingredient.name] || 0;
 
-  const handleGenerateShoppingList = () => {
-    let shoppingListItems = [];
-    scaledIngredients.forEach(ingredient => {
-      const required = ingredient.quantity; // Utiliser la quantité numérique
-      const inStock = mockStock[ingredient.name] || 0;
+     if (required > inStock) {
+       const needed = required - inStock;
+       const unit = ingredient.unit ? ingredient.unit : '';
+       const item = `${needed.toFixed(1)} ${unit} ${ingredient.name}`;
+       shoppingListItems.push(item);
+     }
+   });
 
-      if (required > inStock) {
-        const needed = required - inStock;
-        // Formatage pour l'affichage de la liste
-        shoppingListItems.push(`${needed.toFixed(1)} ${ingredient.unit || ''} ${ingredient.name}`);
-      }
-    });
+   if (shoppingListItems.length > 0) {
+     Alert.alert(
+       'Shopping List',
+       'You need to buy:\n\n' + shoppingListItems.join('\n'),
+       [{ text: 'OK' }]
+     );
+   } else {
+     Alert.alert('Shopping List', 'You have all the ingredients in stock!', [{ text: 'OK' }]);
+   }
+ };
 
-    if (shoppingListItems.length > 0) {
-      Alert.alert(
-        'Shopping List',
-        'You need to buy:\n\n' + shoppingListItems.join('\n'),
-        [{ text: 'OK' }]
+  const handleAIExplain = async () => {
+    setLoadingIA(true);
+    setIaResponse('');
+    try {
+        const recipeTitle = currentRecipeDetails.name || 'ce plat';
+        const recipeTime = currentRecipeDetails.time || 'un certain temps';
+        const ingredientList = scaledIngredients.map(ing => ing.name).join(', ') || 'des ingrédients inconnus';
+
+      const prompt = `Explique simplement le plat "${recipeTitle}". Il contient ${ingredientList} et prend ${recipeTime} à cuisiner.`;
+
+      const response = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: 'gpt-3.5-turbo',
+          messages: [{ role: 'user', content: prompt }],
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, // Remplace ici ta vraie clé
+            'Content-Type': 'application/json',
+          },
+        }
       );
-    } else {
-      Alert.alert('Shopping List', 'You have all the ingredients in stock!', [{ text: 'OK' }]);
+
+
+      setIaResponse(response.data.choices[0].message.content);
+    } catch (err) {
+      console.error(err);
+      setIaResponse("Erreur lors de la requête à l’IA.");
+    } finally {
+      setLoadingIA(false);
     }
   };
-
-  // Le `fullRecipeData` est maintenant une combinaison de `recipe` et `detailedRecipeData`
-  // Surtout pour les champs que `recipe` de la navigation ne contient pas
-  const displayRecipe = {
-    ...detailedRecipeData, // Détails complets comme cookware, instructions
-    ...recipe, // Écrase les champs communs avec ceux passés par la navigation (image, title, rating, etc.)
-    // Assurez-vous que `servings` est un nombre ici pour `RecipeDetailHeader`
-    servings: currentServings, // On utilise l'état local des parts
-  };
-
 
   const renderContent = () => {
     switch (activeTab) {
@@ -158,11 +164,8 @@ const RecipeDetailScreen = ({ navigation, route }) => {
   };
 
   return (
-    // Le ScrollView doit envelopper tout le contenu défilable, y compris l'en-tête, les onglets et le contenu des onglets.
-    // Le style `flex: 1` sur le ScrollView lui permet de prendre toute la hauteur disponible.
-    // Le `contentContainerStyle` permet le défilement si le contenu dépasse la hauteur.
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-       <RecipeDetailHeader
+      <RecipeDetailHeader
         imageSource={currentRecipeDetails.image}
         title={currentRecipeDetails.name}
         rating={currentRecipeDetails.rating}
@@ -170,37 +173,34 @@ const RecipeDetailScreen = ({ navigation, route }) => {
         price={currentRecipeDetails.price}
         onGoBack={() => navigation.goBack()}
         onShare={() => console.log('Share Recipe')}
-        currentServings={currentServings} // Passe l'état des parts au sélecteur
+        currentServings={currentServings}
         onServingsIncrease={handleIncreaseServings}
         onServingsDecrease={handleDecreaseServings}
       />
 
       <View style={styles.tabsContainer}>
-        <TabButton
-          title="Cookware"
-          isActive={activeTab === 'Cookware'}
-          onPress={() => setActiveTab('Cookware')}
-        />
-        <TabButton
-          title="Ingredients"
-          isActive={activeTab === 'Ingredients'}
-          onPress={() => setActiveTab('Ingredients')}
-        />
-        <TabButton
-          title="Instructions"
-          isActive={activeTab === 'Instructions'}
-          onPress={() => setActiveTab('Instructions')}
-        />
+        <TabButton title="Cookware" isActive={activeTab === 'Cookware'} onPress={() => setActiveTab('Cookware')} />
+        <TabButton title="Ingredients" isActive={activeTab === 'Ingredients'} onPress={() => setActiveTab('Ingredients')} />
+        <TabButton title="Instructions" isActive={activeTab === 'Instructions'} onPress={() => setActiveTab('Instructions')} />
       </View>
 
-      {/* Le contenu des onglets doit être directement rendu ici pour éviter un ScrollView imbriqué inutile */}
+      <TouchableOpacity onPress={handleAIExplain} style={{ backgroundColor: '#F57C00', padding: 12, borderRadius: 8, marginHorizontal: 20, marginTop: 10 }}>
+        <Text style={{ color: '#fff', textAlign: 'center', fontWeight: 'bold' }}>Demander à l’IA d’expliquer ce plat</Text>
+      </TouchableOpacity>
+
+      {loadingIA && <ActivityIndicator style={{ marginTop: 10 }} color="#F57C00" />}
+      {iaResponse !== '' && (
+        <View style={{ margin: 15, backgroundColor: '#f4f4f4', padding: 12, borderRadius: 8 }}>
+          <Text style={{ color: '#333' }}>{iaResponse}</Text>
+        </View>
+      )}
+
       <View style={styles.tabContentArea}>
         {renderContent()}
       </View>
 
-      {/* Nouveau bouton de liste de courses en bas du ScrollView */}
       <View style={styles.generateListButtonContainer}>
-          <GenerateShoppingListButton onPress={handleGenerateShoppingList} />
+        <GenerateShoppingListButton onPress={handleGenerateShoppingList} />
       </View>
     </ScrollView>
   );
