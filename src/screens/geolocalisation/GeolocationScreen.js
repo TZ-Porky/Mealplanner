@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, PermissionsAndroid, Platform, FlatList, TouchableOpacity, Modal, Linking, Image, TextInput } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
@@ -10,6 +11,7 @@ export default function GeolocationScreen() {
   const [errorMsg, setErrorMsg] = useState('');
   const [selectedMarket, setSelectedMarket] = useState(null);
   const [comment, setComment] = useState('');
+  const apiKey = 'AIzaSyDqJtH6hpF1i1ct9qHzKsqHh4wzMwZTzfw';
 
   useEffect(() => {
     const requestLocationPermission = async () => {
@@ -19,7 +21,7 @@ export default function GeolocationScreen() {
             PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
           );
           if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-            setErrorMsg("Permission localisation refusée.");
+            setErrorMsg('Permission localisation refusée.');
             setLoading(false);
             return;
           }
@@ -44,9 +46,7 @@ export default function GeolocationScreen() {
     requestLocationPermission();
   }, []);
 
-  // Recherche avec plusieurs mots-clés pour maximiser les chances de trouver des marchés
   const fetchNearbyMarkets = async (latitude, longitude) => {
-    const apiKey = 'AIzaSyDqJtH6hpF1i1ct9qHzKsqHh4wzMwZTzfw'; // Mets ta clé ici
     const radius = 5000;
     const keywords = ['marché', 'market', 'bazaar', 'central'];
     let allResults = [];
@@ -62,7 +62,6 @@ export default function GeolocationScreen() {
       } catch (e) {}
     }
 
-    // Supprimer les doublons par place_id
     const uniqueMarkets = [];
     const seen = new Set();
     for (let item of allResults) {
@@ -78,7 +77,6 @@ export default function GeolocationScreen() {
   const getPhotoUrl = (market) => {
     if (market && market.photos && market.photos.length > 0) {
       const ref = market.photos[0].photo_reference;
-      const apiKey = 'AIzaSyDqJtH6hpF1i1ct9qHzKsqHh4wzMwZTzfw'; // Mets ta clé ici
       return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${ref}&key=${apiKey}`;
     }
     return null;

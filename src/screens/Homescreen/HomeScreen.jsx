@@ -62,10 +62,10 @@ const recommendedRecipes = [
 ];
 // ========================================================================================//
 const myIngredients = [
-  { id: 'a', imageSource: tomatoIcon, name: 'Tomatoes', pics: 60, price: 50 },
-  { id: 'b', imageSource: meatIcon, name: 'Piece of Meat', pics: 11, price: 500 },
-  { id: 'c', imageSource: breadIcon, name: 'Bread Slice', pics: 30, price: 100 },
-  { id: 'd', imageSource: cheeseIcon, name: 'Cheese', pics: 15, price: 150 },
+  {id: 'a', imageSource: tomatoIcon, name: 'Tomatoes', pics: 60, price: 50},
+  {id: 'b', imageSource: meatIcon, name: 'Piece of Meat', pics: 11, price: 500},
+  {id: 'c', imageSource: breadIcon, name: 'Bread Slice', pics: 30, price: 100},
+  {id: 'd', imageSource: cheeseIcon, name: 'Cheese', pics: 15, price: 150},
 ];
 // ========================================================================================//
 const plannedMeals = [
@@ -87,7 +87,6 @@ const plannedMeals = [
 // ========================================================================================//
 
 const HomeScreen = ({navigation}) => {
-
   // eslint-disable-next-line no-unused-vars
   const [currentUser, setCurrentUser] = useState(null); // Pour stocker l'utilisateur courant
   const [loading, setLoading] = useState(true); // Pour gérer l'état de chargement
@@ -115,7 +114,7 @@ const HomeScreen = ({navigation}) => {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <ActivityIndicator size="large" color="#0000ff" />
         <Text>Chargement de la page d'acceuil...</Text>
       </View>
@@ -126,18 +125,17 @@ const HomeScreen = ({navigation}) => {
     <View style={styles.container}>
       <Header title="Home" />
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        {/* Section de bienvenue */}
         <View style={styles.section}>
-          <Text style={styles.greetingText}>Hi,
+          <Text style={styles.greetingText}>
+            Hi,
             <Text style={styles.greetingTextHighlight}> {userName} </Text>
-            </Text>
+          </Text>
           <Text style={styles.questionText}>
             Are we cooking something today?
           </Text>
         </View>
-        {/* Section de recherche */}
+
         <View style={styles.section}>
-          {/* Option 1: Intégrer directement la barre de recherche */}
           <View style={styles.searchBarContainer}>
             <TextInput
               style={styles.searchInput}
@@ -149,7 +147,7 @@ const HomeScreen = ({navigation}) => {
             </TouchableOpacity>
           </View>
         </View>
-        {/* Section des recettes recommandées */}
+
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recommended recipes</Text>
@@ -161,8 +159,7 @@ const HomeScreen = ({navigation}) => {
             horizontal
             showsHorizontalScrollIndicator={false}
             style={styles.recipesScroll}
-            contentContainerStyle={{paddingRight: 20}} // Exemple
-          >
+            contentContainerStyle={{paddingRight: 20}}>
             {recommendedRecipes.map(recipe => (
               <RecipeCard
                 key={recipe.id}
@@ -172,12 +169,14 @@ const HomeScreen = ({navigation}) => {
                 price={recipe.price}
                 rating={recipe.rating}
                 tags={recipe.tags}
-                onPress={() => navigation.navigate('RecipeDetail', { recipe: recipe })}
+                onPress={() =>
+                  navigation.navigate('RecipeDetail', {recipe: recipe})
+                }
               />
             ))}
           </ScrollView>
         </View>
-        {/* Section des ingrédients */}
+
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>My ingredients</Text>
@@ -200,7 +199,7 @@ const HomeScreen = ({navigation}) => {
             ))}
           </View>
         </View>
-        {/* Section de planification des repas */}
+
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Planning Meals</Text>
@@ -209,7 +208,9 @@ const HomeScreen = ({navigation}) => {
             </TouchableOpacity>
           </View>
           <Text style={styles.currentMonth}>May, 2025</Text>
-          <DateSelector /> {/* Utilisation du composant DateSelector */}
+
+          <DateSelector />
+
           <View style={styles.mealPlanDetails}>
             {plannedMeals.map(meal => (
               <MealCardPlan
@@ -223,13 +224,13 @@ const HomeScreen = ({navigation}) => {
             ))}
           </View>
         </View>
-        {/* Bouton de recommandation */}
+
         <View style={styles.recommendButtonSection}>
           <RecommendButton
             onPress={() => console.log('Recommend me a meal!')}
           />
         </View>
-        <View style={{height: Layout.spacing.medium}} /> {/* Marge en bas */}
+        <View style={{height: Layout.spacing.medium}} />
       </ScrollView>
     </View>
   );

@@ -13,9 +13,9 @@ import MarketScreen from '../screens/Marketscreen/MarketScreen';
 // Placeholder components (à remplacer plus tard par les vrais)
 import {Colors} from '../styles/AppStyles';
 import styles from './MainTabNavigatorStyle';
-// ...existing code...
 import GeolocationScreen from '../screens/geolocalisation/GeolocationScreen';
-// ...existing code...
+import GeolocalisationScreen from '../screens/geolocalisation/GeolocalisationScreen';
+
 // --------------------------------------------------------------------//
 
 const Tab = createBottomTabNavigator();
@@ -119,6 +119,7 @@ function MainTabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={{headerShown: false}}
+      // eslint-disable-next-line react/no-unstable-nested-components
       tabBar={props => <CustomTabBar {...props} />}>
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Market" component={MarketScreen} />
@@ -126,7 +127,7 @@ function MainTabNavigator() {
       <Tab.Screen name="Planning" component={PlannerScreen} />
       <Tab.Screen name="Courses" component={CourseListScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
-      <Tab.Screen name="Geolocalisation" component={GeolocationScreen} options={{ tabBarLabel: 'Géolocalisation' }} />
+      <Tab.Screen name="Geolocalisation" component={GeolocalisationScreen} options={{ tabBarLabel: 'Géolocalisation' }} />
     </Tab.Navigator>
   );
 }
