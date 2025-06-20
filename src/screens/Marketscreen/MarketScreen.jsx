@@ -8,9 +8,8 @@ import MealCard from '../../components/MealCard/MealCard';
 import AddMealButton from '../../components/AddMealButton/AddMealButton';
 import styles from './MarketScreenStyles';
 import { GlobalStyles } from '../../styles/AppStyles';
-import RecipeServices from '../../services/RecipeServices'; // Importe le service
-
-// Retire DUMMY_MEALS car nous allons charger depuis Firestore
+import RecipeServices from '../../services/RecipeServices';
+import NotificationScreen from '../Notificationscreen/NotificationScreen';
 
 const MarketScreen = ({ navigation }) => {
   const [recipes, setRecipes] = useState([]);
@@ -19,21 +18,18 @@ const MarketScreen = ({ navigation }) => {
   const [activeFilter, setActiveFilter] = useState('All');
   const [loading, setLoading] = useState(true);
 
-  const filters = ['All', 'Sweet', 'Salty', 'Vegetarian', 'Vegan', 'Dessert', 'Breakfast']; // Exemples de filtres
+  const filters = ['All', 'Sweet', 'Salty', 'Vegetarian', 'Vegan', 'Dessert', 'Breakfast'];
 
   useEffect(() => {
-    // Charger les recettes au montage du composant
     const unsubscribe = RecipeServices.onRecipesChanged((fetchedRecipes) => {
       setRecipes(fetchedRecipes);
       setLoading(false);
-    }, null); // Passe null pour récupérer toutes les recettes, ou auth.currentUser.uid pour celles de l'utilisateur
+    }, null);
 
-    // Nettoyage de l'écouteur lors du démontage du composant
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    // Appliquer les filtres et la recherche
     let currentFiltered = recipes;
 
     if (activeFilter !== 'All') {
@@ -61,7 +57,6 @@ const MarketScreen = ({ navigation }) => {
   };
 
   const handleMealPress = (meal) => {
-    // Naviguer vers un écran de détails de recette
     navigation.navigate('RecipeDetail', { recipeId: meal.id });
   };
 
@@ -70,11 +65,10 @@ const MarketScreen = ({ navigation }) => {
   };
 
   // Composant d'en-tête pour la FlatList
-  // eslint-disable-next-line react/no-unstable-nested-components
   const ListHeader = () => (
     <View>
       <MarketHeader
-        onNotificationsPress={() => Alert.alert('Notifications', 'Notifications pressed')}
+        onNotificationsPress={() => navigation.navigate('Notification')}
         onCartPress={() => Alert.alert('Cart', 'Cart pressed')}
       />
       <View style={styles.greetingSection}>
@@ -98,8 +92,6 @@ const MarketScreen = ({ navigation }) => {
     </View>
   );
 
-  // Composant de pied de page pour la FlatList (contiendra le bouton "Add Meal")
-  // eslint-disable-next-line react/no-unstable-nested-components
   const ListFooter = () => (
     <View style={styles.footerButtonContainer}>
       <AddMealButton onPress={handleAddMeal} />

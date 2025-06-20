@@ -15,6 +15,7 @@ import {Colors} from '../styles/AppStyles';
 import styles from './MainTabNavigatorStyle';
 // ...existing code...
 import GeolocationScreen from '../screens/geolocalisation/GeolocationScreen';
+import ProfileScreen from '../screens/Profilescreen/ProfileScreen';
 // ...existing code...
 // --------------------------------------------------------------------//
 
@@ -32,13 +33,6 @@ function CourseListScreen() {
   );
 }
 
-function ProfileScreen() {
-  return (
-    <View>
-      <Text>Profile Page</Text>
-    </View>
-  );
-}
 
 
 // --------------------------------------------------------------------//
@@ -127,6 +121,8 @@ function MainTabNavigator() {
       <Tab.Screen name="Courses" component={CourseListScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
       <Tab.Screen name="Geolocalisation" component={GeolocationScreen} options={{ tabBarLabel: 'Géolocalisation' }} />
+      
+      
     </Tab.Navigator>
   );
 }

@@ -14,7 +14,7 @@ const MarketHeader = ({ onMenuPress, onNotificationsPress, onCartPress }) => {
         <Text style={styles.headerTitle}>Market</Text>
       </View>
       <View style={styles.rightSection}>
-        <TouchableOpacity onPress={onNotificationsPress} style={styles.iconButton}>
+        <TouchableOpacity onPress={() => navigation.navigate('Notification')}>
           <Icon name="notifications-outline" size={Fonts.sizes.large} style={styles.headerIcon} />
         </TouchableOpacity>
         <TouchableOpacity onPress={onCartPress} style={styles.iconButton}>
