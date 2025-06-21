@@ -10,11 +10,11 @@ import HomeScreen from '../screens/Homescreen/HomeScreen';
 import PlannerScreen from '../screens/Planningscreen/PlanningScreen';
 import StocksScreen from '../screens/Stockscreen/StockScreen';
 import MarketScreen from '../screens/Marketscreen/MarketScreen';
-// Placeholder components (à remplacer plus tard par les vrais)
 import {Colors} from '../styles/AppStyles';
 import styles from './MainTabNavigatorStyle';
-import GeolocationScreen from '../screens/geolocalisation/GeolocationScreen';
-import GeolocalisationScreen from '../screens/geolocalisation/GeolocalisationScreen';
+import GeolocationScreen from '../screens/GeolocatitionScreen/GeolocationScreen';
+import GeolocalisationScreen from '../screens/GeolocatitionScreen/GeolocalisationScreen';
+import ShoppingListsScreen from '../screens/ShoppingListScreen/ShoppingListScreen';
 
 // --------------------------------------------------------------------//
 
@@ -23,14 +23,6 @@ const Tab = createBottomTabNavigator();
 // --------------------------------------------------------------------//
 // Temporary screen components (replace with real screens later)
 // --------------------------------------------------------------------//
-
-function CourseListScreen() {
-  return (
-    <View>
-      <Text>Course List Page</Text>
-    </View>
-  );
-}
 
 function ProfileScreen() {
   return (
@@ -125,9 +117,9 @@ function MainTabNavigator() {
       <Tab.Screen name="Market" component={MarketScreen} />
       <Tab.Screen name="Stocks" component={StocksScreen} />
       <Tab.Screen name="Planning" component={PlannerScreen} />
-      <Tab.Screen name="Courses" component={CourseListScreen} />
+      <Tab.Screen name="Courses" component={ShoppingListsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
-      <Tab.Screen name="Geolocalisation" component={GeolocalisationScreen} options={{ tabBarLabel: 'Géolocalisation' }} />
+      <Tab.Screen name="Geolocalisation" component={GeolocationScreen} options={{ tabBarLabel: 'Géolocalisation' }} />
     </Tab.Navigator>
   );
 }
