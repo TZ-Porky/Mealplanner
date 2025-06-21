@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unstable-nested-components */
 import React, { useState } from 'react';
 import { View, Text, FlatList, Alert } from 'react-native';
 import MarketHeader from '../../components/MarketHeader/MarketHeader'; // Réutilisation
@@ -117,6 +118,7 @@ const StockScreen = ({ navigation }) => {
         onMenuPress={() => navigation.openDrawer && navigation.openDrawer()}
         onNotificationsPress={() => Alert.alert('Notifications', 'Notifications pressed')}
         onCartPress={() => Alert.alert('Cart', 'Cart pressed')}
+        onAddPress={handleAddIngredient}
       />
 
       <View style={styles.greetingSection}>
@@ -140,12 +142,6 @@ const StockScreen = ({ navigation }) => {
     </View>
   );
 
-  const ListFooter = () => (
-    <View style={styles.footerButtonContainer}>
-      <AddIngredientButton onPress={handleAddIngredient} />
-    </View>
-  );
-
   return (
     <View style={GlobalStyles.container}>
       <FlatList
@@ -160,7 +156,6 @@ const StockScreen = ({ navigation }) => {
           />
         )}
         ListHeaderComponent={ListHeader}
-        ListFooterComponent={ListFooter}
         contentContainerStyle={styles.flatListContentContainer}
       />
     </View>

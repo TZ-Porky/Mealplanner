@@ -5,12 +5,9 @@ import MarketHeader from '../../components/MarketHeader/MarketHeader';
 import SearchBar from '../../components/SearchBar/SearchBar';
 import FilterButtons from '../../components/FilterButtons/FilterButtons';
 import MealCard from '../../components/MealCard/MealCard';
-import AddMealButton from '../../components/AddMealButton/AddMealButton';
 import styles from './MarketScreenStyles';
 import { GlobalStyles } from '../../styles/AppStyles';
-import RecipeServices from '../../services/RecipeServices'; // Importe le service
-
-// Retire DUMMY_MEALS car nous allons charger depuis Firestore
+import RecipeServices from '../../services/RecipeServices';
 
 const MarketScreen = ({ navigation }) => {
   const [recipes, setRecipes] = useState([]);
@@ -19,7 +16,7 @@ const MarketScreen = ({ navigation }) => {
   const [activeFilter, setActiveFilter] = useState('All');
   const [loading, setLoading] = useState(true);
 
-  const filters = ['All', 'Sweet', 'Salty', 'Vegetarian', 'Vegan', 'Dessert', 'Breakfast']; // Exemples de filtres
+  const filters = ['All', 'Sweet', 'Salty', 'Vegetarian', 'Vegan', 'Dessert', 'Breakfast'];
 
   useEffect(() => {
     // Charger les recettes au montage du composant
@@ -69,13 +66,13 @@ const MarketScreen = ({ navigation }) => {
     navigation.navigate('AddMeal');
   };
 
-  // Composant d'en-tête pour la FlatList
   // eslint-disable-next-line react/no-unstable-nested-components
   const ListHeader = () => (
     <View>
       <MarketHeader
         onNotificationsPress={() => Alert.alert('Notifications', 'Notifications pressed')}
         onCartPress={() => Alert.alert('Cart', 'Cart pressed')}
+        onAddPress={handleAddMeal}
       />
       <View style={styles.greetingSection}>
         <Text style={styles.browseTitle}>
@@ -98,14 +95,6 @@ const MarketScreen = ({ navigation }) => {
     </View>
   );
 
-  // Composant de pied de page pour la FlatList (contiendra le bouton "Add Meal")
-  // eslint-disable-next-line react/no-unstable-nested-components
-  const ListFooter = () => (
-    <View style={styles.footerButtonContainer}>
-      <AddMealButton onPress={handleAddMeal} />
-    </View>
-  );
-
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -124,9 +113,16 @@ const MarketScreen = ({ navigation }) => {
           <MealCard meal={item} onPress={() => handleMealPress(item)} />
         )}
         ListHeaderComponent={ListHeader}
-        ListFooterComponent={ListFooter}
         contentContainerStyle={styles.flatListContentContainer}
         showsVerticalScrollIndicator={false}
+        // eslint-disable-next-line react/no-unstable-nested-components
+        ListEmptyComponent={() => (
+          <View style={{ alignItems: 'center', marginTop: '30%' }}>
+            <Text style={{ fontSize: 16, color: '#888', textAlign: 'center'}}>
+              No recipes found. Try adjusting your filters or search query.
+            </Text>
+          </View>
+        )}
       />
     </View>
   );

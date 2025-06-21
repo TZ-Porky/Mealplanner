@@ -3,12 +3,12 @@ import ShoppingListItem from './ElementListeCourse';
 class ShoppingList {
   constructor(
     id = null,
-    authorId, // L'ID de l'utilisateur qui a créé la liste
-    name, // Nom de la liste de courses
-    recipeName = null, // Nom de la recette associée (optionnel)
-    items = [], // Liste d'objets ShoppingListItem
-    dateCreated = new Date(), // Date de création de la liste
-    status = 'EN COURS', // État de la liste (EN COURS, TERMINÉ)
+    authorId,
+    name,
+    recipeName = null,
+    items = [],
+    dateCreated = new Date(),
+    status = 'EN COURS',
   ) {
     this.id = id;
     this.authorId = authorId;

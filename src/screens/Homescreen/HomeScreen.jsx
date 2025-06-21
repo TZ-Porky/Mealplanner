@@ -16,7 +16,6 @@ import RecipeCard from '../../components/RecipeCard/RecipeCard';
 import IngredientCard from '../../components/IngredientPlanCard/IngredientPlanCard';
 import DateSelector from '../../components/DateSelector/DateSelector';
 import MealCardPlan from '../../components/MealCardPlan/MealCardPlan';
-import RecommendButton from '../../components/RecommendButton/RecommendButton';
 // Styles
 import styles from './HomeScreenStyle';
 import {Layout, Colors} from '../../styles/AppStyles';
@@ -224,13 +223,6 @@ const HomeScreen = ({navigation}) => {
             ))}
           </View>
         </View>
-
-        <View style={styles.recommendButtonSection}>
-          <RecommendButton
-            onPress={() => console.log('Recommend me a meal!')}
-          />
-        </View>
-        <View style={{height: Layout.spacing.medium}} />
       </ScrollView>
     </View>
   );

@@ -3,7 +3,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import MainTabNavigator from './src/navigation/MainTabNavigator'; // Assurez-vous que le chemin est correct
+import MainTabNavigator from './src/navigation/MainTabNavigator';
 import SplashScreen from './src/screens/Splashscreen/SplashScreen';
 import LandingScreen from './src/screens/Landingscreen/LandingScreen';
 import ConnexionScreen from './src/screens/Authentificationscreen/ConnexionScreen';
@@ -12,7 +12,8 @@ import RecipeDetailScreen from './src/screens/RecipeDetailScreen/RecipeDetailScr
 import AddMealScreen from './src/screens/AddMealScreen/AddMealScreen';
 import EditMealScreen from './src/screens/EditMealScreen/EditMealScreen';
 import SetupNavigator from './src/navigation/SetupNavigator';
-import ChatAIScreen from './src/screens/ChatAIScreen';
+import ChatAIScreen from './src/screens/ChatScreen/ChatAIScreen';
+import ShoppingListFormScreen from './src/screens/ShoppingListScreen/ShoppingListFormScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -26,6 +27,7 @@ function RootStack() {
       <Stack.Screen name="SignUp" component={InscriptionScreen} />
       <Stack.Screen name="RecipeDetail" component={RecipeDetailScreen} />
       <Stack.Screen name="EditMeal" component={EditMealScreen}/>
+      <Stack.Screen name="ShoppingListForm" component={ShoppingListFormScreen} />
       <Stack.Screen name="Setup" component={SetupNavigator} />
       <Stack.Screen name="Main" component={MainTabNavigator} />
       <Stack.Screen name="ChatAI" component={ChatAIScreen} />

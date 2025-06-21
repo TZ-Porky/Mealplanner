@@ -5,7 +5,7 @@ import {View, Text, TouchableOpacity} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 // --------------------------------------------------------------------//
-import ChatAIScreen from '../screens/ChatAIScreen';
+import ChatAIScreen from '../screens/ChatScreen/ChatAIScreen';
 import FloatingAIButton from '../components/FloatingAIButton';
 import HomeScreen from '../screens/Homescreen/HomeScreen';
 import PlannerScreen from '../screens/Planningscreen/PlanningScreen';
@@ -76,8 +76,8 @@ function CustomTabBar({state, descriptors, navigation}) {
           case 'Courses':
             iconName = isFocused ? 'receipt' : 'receipt-outline';
             break;
-             case 'Geolocalisation':
-             iconName = isFocused ? 'location' : 'location-outline';
+             case 'Carte':
+             iconName = isFocused ? 'map' : 'map-outline';
             break;
         }
 
@@ -121,7 +121,7 @@ function MainTabNavigator() {
       <Tab.Screen name="Planning" component={PlannerScreen} />
       <Tab.Screen name="Courses" component={ShoppingListsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
-      <Tab.Screen name="Geolocalisation" component={GeolocationScreen} options={{ tabBarLabel: 'Géolocalisation' }} />
+      <Tab.Screen name="Carte" component={GeolocationScreen}/>
     </Tab.Navigator>
     <FloatingAIButton/>
     </View>
