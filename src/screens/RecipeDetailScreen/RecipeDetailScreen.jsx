@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useEffect} from 'react';
-import {ScrollView, View, Alert, ActivityIndicator, Text} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { ScrollView, View, Alert, ActivityIndicator, Text } from 'react-native';
 import RecipeDetailHeader from '../../components/RecipeDetailHeader/RecipeDetailHeader';
 import GenerateShoppingListButton from '../../components/GenerateShoppingListButton/GenerateShoppingListButton';
 import TabButton from '../../components/TabButton/TabButton';
@@ -8,14 +8,11 @@ import CookwareSection from '../../components/CookwareSection/CookwareSection';
 import IngredientsSection from '../../components/IngredientsSection/IngredientsSection';
 import InstructionsSection from '../../components/InstructionsSection/InstructionsSection';
 import styles from './RecipeDetailScreenStyles';
-import RecipeServices from '../../services/RecipeServices';
-import AuthServices from '../../services/AuthServices';
-import ShoppingListServices from '../../services/ShoppingListServices';
-import ShoppingListItem from '../../models/ElementListeCourse';
-import ShoppingList from '../../models/ListeCourse';
+import RecipeServices from '../../services/RecipeServices'; // Importez le service de recettes
+import AuthServices from '../../services/AuthServices'; // Importez le service d'authentification
 
-const RecipeDetailScreen = ({route, navigation}) => {
-  const {recipeId} = route.params;
+const RecipeDetailScreen = ({ route, navigation }) => {
+  const { recipeId } = route.params;
   const [currentRecipeDetails, setCurrentRecipeDetails] = useState(null);
   const [currentServings, setCurrentServings] = useState(1);
   const [activeTab, setActiveTab] = useState('Cookware');
@@ -37,26 +34,25 @@ const RecipeDetailScreen = ({route, navigation}) => {
           setError('Recette introuvable.');
         }
       } catch (errorFetchRecipe) {
-        console.error(
-          'Erreur lors de la récupération de la recette:',
-          errorFetchRecipe,
-        );
+        console.error('Erreur lors de la récupération de la recette:', errorFetchRecipe);
         Alert.alert('Erreur', 'Impossible de charger la recette.');
         navigation.goBack();
       } finally {
         setLoading(false);
       }
+
     };
 
     fetchRecipe();
 
     // Écoute des changements de recettes
-    const unsubscribe = RecipeServices.onRecipesChanged(updatedRecipes => {
+    const unsubscribe = RecipeServices.onRecipesChanged((updatedRecipes) => {
       fetchRecipe();
     });
 
     // Nettoyage de l'écouteur lors du démontage du composant
     return () => unsubscribe();
+
   }, [navigation, recipeId]);
 
   const handleIncreaseServings = () => {
@@ -71,135 +67,18 @@ const RecipeDetailScreen = ({route, navigation}) => {
     }
   };
 
-  const handleGenerateShoppingList = async () => {
-    if (!currentRecipeDetails) {
+  const handleGenerateShoppingList = () => {
+    if (currentRecipeDetails) {
       Alert.alert(
-        'Erreur',
-        'Impossible de générer la liste de courses: recette non disponible.',
-      );
-      return;
-    }
-
-    try {
-      const currentUser = await AuthServices.getCurrentUser();
-      if (!currentUser?.uid) {
-        Alert.alert(
-          'Erreur',
-          'Vous devez être connecté pour générer une liste de courses.',
-        );
-        return;
-      }
-
-      const userStock = {};
-      // const userStock = await StockServices.getUserStock(currentUser.uid); // Ceci sera ta vraie implémentation
-
-      const shoppingListItems = [];
-
-      // Ajuster les quantités en fonction des portions actuelles
-      const ingredientsNeeded = currentRecipeDetails.ingredients.map(item => ({
-        ...item,
-        quantity:
-          currentRecipeDetails.servings > 0
-            ? (item.quantity / currentRecipeDetails.servings) * currentServings
-            : item.quantity,
-      }));
-
-      // 2. Traiter les ingrédients
-      for (const ingredient of ingredientsNeeded) {
-        const stockItem = userStock[ingredient.name.toLowerCase()]; // Assumer que le nom est la clé du stock
-        let quantityToAdd = ingredient.quantity;
-
-        if (stockItem && stockItem.quantity >= quantityToAdd) {
-          // L'ingrédient est en stock en quantité suffisante, ne rien ajouter à la liste de courses
-          console.log(`${ingredient.name} déjà en stock.`);
-        } else if (stockItem && stockItem.quantity < quantityToAdd) {
-          // L'ingrédient est en stock mais en quantité insuffisante
-          quantityToAdd -= stockItem.quantity;
-          shoppingListItems.push(
-            new ShoppingListItem(
-              ingredient.name,
-              quantityToAdd,
-              ingredient.unitOfMeasure,
-              ingredient.category,
-              'ingredient',
-            ),
-          );
-          console.log(
-            `Manque ${quantityToAdd} ${ingredient.unitOfMeasure} de ${ingredient.name}.`,
-          );
-        } else {
-          // L'ingrédient n'est pas du tout en stock
-          shoppingListItems.push(
-            new ShoppingListItem(
-              ingredient.name,
-              quantityToAdd,
-              ingredient.unitOfMeasure,
-              ingredient.category,
-              'ingredient',
-            ),
-          );
-          console.log(`${ingredient.name} à acheter.`);
-        }
-      }
-
-      currentRecipeDetails.utensils.forEach(utensil => {
-        shoppingListItems.push(
-          new ShoppingListItem(
-            utensil.name,
-            utensil.quantity,
-            null, // unitOfMeasure n'est pas applicable
-            null, // category n'est pas applicable
-            'utensil',
-          ),
-        );
-      });
-
-      if (shoppingListItems.length === 0) {
-        Alert.alert(
-          'Info',
-          'Vous avez déjà tous les ingrédients et ustensiles pour cette recette !',
-        );
-        return;
-      }
-
-      const newShoppingList = new ShoppingList(
-        null, // Firestore va générer l'ID
-        currentUser.uid, // L'ID de l'utilisateur actuel
-        `Liste pour ${currentRecipeDetails.title}`, // Nom de la liste
-        currentRecipeDetails.title, // Nom de la recette associée
-        shoppingListItems,
-        new Date(), // Date de création
-        'EN COURS', // Statut initial
-      );
-
-      await ShoppingListServices.createShoppingList(newShoppingList);
-
-      Alert.alert(
-        'Succès',
-        'La liste de courses a été générée et sauvegardée !',
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.navigate('ShoppingListsScreen'),
-          },
-        ], // Naviguer vers l'écran des listes de courses
-      );
-    } catch (errorGenerate) {
-      console.error(
-        'Erreur lors de la génération de la liste de courses:',
-        errorGenerate,
-      );
-      Alert.alert(
-        'Erreur',
-        'Impossible de générer la liste de courses. Veuillez réessayer.',
+        'Générer la liste de courses',
+        `Vous allez générer une liste de courses pour "${currentRecipeDetails.nom}" pour ${currentServings} portions.`,
+        [{ text: 'OK' }]
       );
     }
   };
 
   const renderContent = () => {
-    if (!currentRecipeDetails) {
-      return null;
-    }
+    if (!currentRecipeDetails) {return null;}
 
     const adjustedCookware = currentRecipeDetails.utensils.map(item => ({
       ...item,
@@ -222,11 +101,7 @@ const RecipeDetailScreen = ({route, navigation}) => {
       case 'Ingredients':
         return <IngredientsSection ingredients={adjustedIngredients} />;
       case 'Instructions':
-        return (
-          <InstructionsSection
-            instructionsList={currentRecipeDetails.instructions}
-          />
-        );
+        return <InstructionsSection instructionsList={currentRecipeDetails.instructions} />;
       default:
         return null;
     }
@@ -234,36 +109,24 @@ const RecipeDetailScreen = ({route, navigation}) => {
 
   if (loading) {
     return (
-      <View
-        style={[
-          styles.container,
-          {justifyContent: 'center', alignItems: 'center'},
-        ]}>
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <ActivityIndicator size="large" color="#f3c09e" />
-        <Text style={{marginTop: 10}}>Chargement de la recette...</Text>
+        <Text style={{ marginTop: 10 }}>Chargement de la recette...</Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View
-        style={[
-          styles.container,
-          {justifyContent: 'center', alignItems: 'center'},
-        ]}>
-        <Text style={{color: 'red', textAlign: 'center'}}>{error}</Text>
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={{ color: 'red', textAlign: 'center' }}>{error}</Text>
       </View>
     );
   }
 
   if (!currentRecipeDetails) {
     return (
-      <View
-        style={[
-          styles.container,
-          {justifyContent: 'center', alignItems: 'center'},
-        ]}>
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <Text>Aucune recette disponible.</Text>
       </View>
     );
@@ -271,7 +134,7 @@ const RecipeDetailScreen = ({route, navigation}) => {
 
   const handleEditRecipe = () => {
     if (currentRecipeDetails && canBeEdited) {
-      navigation.navigate('EditMeal', {recipe: currentRecipeDetails});
+      navigation.navigate('EditMeal', { recipe: currentRecipeDetails });
     }
   };
 
@@ -280,42 +143,30 @@ const RecipeDetailScreen = ({route, navigation}) => {
       'Confirmer la suppression',
       'Êtes-vous sûr de vouloir supprimer cette recette ? Cette action est irréversible.',
       [
-        {text: 'Annuler', style: 'cancel'},
-        {text: 'Supprimer', style: 'destructive', onPress: deleteRecipe},
-      ],
+        { text: 'Annuler', style: 'cancel' },
+        { text: 'Supprimer', style: 'destructive', onPress: deleteRecipe },
+      ]
     );
   };
 
   const deleteRecipe = async () => {
-    try {
+    try{
       RecipeServices.deleteRecipe(currentRecipeDetails.id);
       navigation.goBack();
       Alert.alert('Confirmation', 'Votre recette a été supprimée avec succès.');
     } catch (deleteError) {
-      console.error(
-        'Erreur lors de la suppression de la recette :',
-        deleteError,
-      );
-      Alert.alert(
-        'Erreur',
-        'Impossible de supprimer la recette. Veuillez réessayer plus tard.',
-      );
+      console.error('Erreur lors de la suppression de la recette :', deleteError);
+      Alert.alert('Erreur', 'Impossible de supprimer la recette. Veuillez réessayer plus tard.');
     }
   };
 
   // Calcul du temps et du coût pour l'affichage dans le header
-  const timeInHours = Math.floor(
-    currentRecipeDetails.preparationTimeMinutes / 60,
-  );
+  const timeInHours = Math.floor(currentRecipeDetails.preparationTimeMinutes / 60);
   const timeInMinutes = currentRecipeDetails.preparationTimeMinutes % 60;
-  const formattedTime =
-    (timeInHours > 0 ? `${timeInHours}h ` : '') +
-    (timeInMinutes > 0 ? `${timeInMinutes}min` : '');
+  const formattedTime = (timeInHours > 0 ? `${timeInHours}h ` : '') + (timeInMinutes > 0 ? `${timeInMinutes}min` : '');
 
   // Calcul du prix total pour l'affichage dans le header
-  const displayPrice = `${currentRecipeDetails
-    .calculateTotalCost()
-    .toFixed(2)} XCFA`;
+  const displayPrice = `${currentRecipeDetails.calculateTotalCost().toFixed(2)} XCFA`;
 
   return (
     <ScrollView style={styles.container}>
@@ -353,7 +204,9 @@ const RecipeDetailScreen = ({route, navigation}) => {
         />
       </View>
 
-      <View style={styles.tabContentArea}>{renderContent()}</View>
+      <View style={styles.tabContentArea}>
+        {renderContent()}
+      </View>
 
       <View style={styles.generateListButtonContainer}>
         <GenerateShoppingListButton onPress={handleGenerateShoppingList} />
