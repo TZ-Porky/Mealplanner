@@ -12,6 +12,7 @@ import RecipeDetailScreen from './src/screens/RecipeDetailScreen/RecipeDetailScr
 import AddMealScreen from './src/screens/AddMealScreen/AddMealScreen';
 import EditMealScreen from './src/screens/EditMealScreen/EditMealScreen';
 import SetupNavigator from './src/navigation/SetupNavigator';
+import ChatAIScreen from './src/screens/ChatAIScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -27,6 +28,8 @@ function RootStack() {
       <Stack.Screen name="EditMeal" component={EditMealScreen}/>
       <Stack.Screen name="Setup" component={SetupNavigator} />
       <Stack.Screen name="Main" component={MainTabNavigator} />
+      <Stack.Screen name="ChatAI" component={ChatAIScreen} />
+
     </Stack.Navigator>
   );
 }

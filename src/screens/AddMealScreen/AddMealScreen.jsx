@@ -1,4 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
+import React, { useState } from 'react';
+
 import {
   View,
   Text,
@@ -6,6 +8,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+<<<<<<< HEAD
 
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
@@ -17,6 +20,18 @@ import StepRecipeIngredients from '../../components/MealDetailsPages/StepRecipeI
 import StepRecipeUstensils from '../../components/MealDetailsPages/StepRecipeUstensils';
 import StepRecipeInstructions from '../../components/MealDetailsPages/StepRecipeInstructions';
 import StepRecipeTagsAndFinish from '../../components/MealDetailsPages/StepRecipeTagsAndFinish';
+=======
+import { useNavigation } from '@react-navigation/native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
+// -------------------------------------------------------------- //
+import styles from './AddMealScreenStyles';
+// Import des nouveaux composants de modale
+import ListInputModal from '../../components/common/ListInputModal';
+import MultilineTextInputModal from '../../components/common/MutliLineInputModal';
+import { Fonts, Layout, Colors } from '../../styles/AppStyles'; // Assurez-vous que le chemin vers vos constantes est correct.
+>>>>>>> origin/dev
 
 const commonStyles = StyleSheet.create({
   container: {
@@ -79,6 +94,7 @@ export default function AddMealScreen() {
 
   const totalSteps = 5; // Total des étapes du formulaire
 
+<<<<<<< HEAD
   const handleNext = (data) => {
     setRecipeData(prev => ({ ...prev, ...data }));
     if (currentStep < totalSteps) {
@@ -152,6 +168,82 @@ export default function AddMealScreen() {
       default:
         return null;
     }
+=======
+  // États pour les modales et leurs données
+  const [ingredients, setIngredients] = useState([]); // Tableau d'ingrédients
+  const [cookware, setCookware] = useState([]); // Tableau d'ustensiles
+  const [instructions, setInstructions] = useState(''); // Texte des instructions
+
+  // Visibilité des modales
+  const [isIngredientsModalVisible, setIsIngredientsModalVisible] = useState(false);
+  const [isCookwareModalVisible, setIsCookwareModalVisible] = useState(false);
+  const [isInstructionsModalVisible, setIsInstructionsModalVisible] = useState(false);
+
+  const [mealImage, setMealImage] = useState(null); // Pour l'URI de l'image sélectionnée
+
+  // --- Gestion de l'image ---
+  const handleChooseImage = () => {
+    Alert.alert(
+      'Add Image',
+      'Choose image source',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Camera',
+          onPress: () => {
+            // Implémentation réelle avec ImagePicker pour la caméra
+            Alert.alert('Camera', 'Camera functionality not fully implemented.');
+            setMealImage('https://via.placeholder.com/150/FF0000/FFFFFF?text=Meal+Image'); // Placeholder pour la démo
+          }
+        },
+        {
+          text: 'Gallery',
+          onPress: () => {
+            // Implémentation réelle avec ImagePicker pour la galerie
+            Alert.alert('Gallery', 'Gallery functionality not fully implemented.');
+            setMealImage('https://via.placeholder.com/150/0000FF/FFFFFF?text=Meal+Image'); // Placeholder pour la démo
+          }
+        },
+      ]
+    );
+  };
+
+  const handleFinish = async () => {
+    // Validation
+    if (!mealName || !serving || !time || ingredients.length === 0 || cookware.length === 0 || !instructions) {
+      return Alert.alert('Error', 'Please fill all required fields.');
+    }
+
+    // Préparation des données
+    const user = auth().currentUser;
+    const newMealData = {
+      name: mealName.trim(),
+      servings: parseInt(serving, 10),
+      time: time.trim(),
+      ingredients,
+      cookware,
+      instructions,
+      image: mealImage,           // URI string ou null
+      creatorUid: user?.uid || null,
+      createdAt: firestore.FieldValue.serverTimestamp(),
+    };
+
+    try {
+      // Enregistrement dans Firestore
+      await firestore()
+        .collection('recipes')
+        .add(newMealData);
+
+      Alert.alert('Success', 'Meal added successfully!');
+      navigation.goBack();
+    } catch (err) {
+      console.error('Firestore error:', err);
+      Alert.alert('Error', "Impossible d'ajouter le plat. Réessaie plus tard.");
+    }
+  };
+  const handleCancel = () => {
+    navigation.goBack();
+>>>>>>> origin/dev
   };
 
   return (

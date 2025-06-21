@@ -5,7 +5,8 @@ import {View, Text, TouchableOpacity} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 // --------------------------------------------------------------------//
-
+import ChatAIScreen from '../screens/ChatAIScreen';
+import FloatingAIButton from '../components/FloatingAIButton';
 import HomeScreen from '../screens/Homescreen/HomeScreen';
 import PlannerScreen from '../screens/Planningscreen/PlanningScreen';
 import StocksScreen from '../screens/Stockscreen/StockScreen';
@@ -109,6 +110,7 @@ function CustomTabBar({state, descriptors, navigation}) {
 // --------------------------------------------------------------------//
 function MainTabNavigator() {
   return (
+      <View style={{ flex: 1}}>
     <Tab.Navigator
       screenOptions={{headerShown: false}}
       // eslint-disable-next-line react/no-unstable-nested-components
@@ -121,6 +123,8 @@ function MainTabNavigator() {
       <Tab.Screen name="Profile" component={ProfileScreen} />
       <Tab.Screen name="Geolocalisation" component={GeolocationScreen} options={{ tabBarLabel: 'Géolocalisation' }} />
     </Tab.Navigator>
+    <FloatingAIButton/>
+    </View>
   );
 }
 
